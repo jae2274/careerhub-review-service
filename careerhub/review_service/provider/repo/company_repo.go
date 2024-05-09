@@ -5,7 +5,9 @@ import (
 	"time"
 
 	"github.com/jae2274/careerhub-review-service/common/domain/company"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type CompanyRepo struct {
@@ -18,9 +20,42 @@ func NewCompanyRepo(db *mongo.Database) *CompanyRepo {
 	}
 }
 
-func (c *CompanyRepo) AddCompany(ctx context.Context, company *company.Company) error {
-	company.InsertedAt = time.Now()
-	_, err := c.col.InsertOne(ctx, company)
+func (cr *CompanyRepo) FindCompany(ctx context.Context, defaultName string, originName string) (*company.Company, bool, error) {
+	filter := bson.M{
+		company.DefaultNameField: defaultName,
+		company.OtherNamesField:  originName,
+	}
 
-	return err
+	var c company.Company
+	err := cr.col.FindOne(ctx, filter).Decode(&c)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, false, nil
+		}
+		return nil, false, err
+	}
+
+	return &c, true, nil
+}
+
+func (cr *CompanyRepo) Save(ctx context.Context, defaultName string, originName string) (*mongo.UpdateResult, error) {
+	// Upsert 필터: defaultName을 기준으로 문서를 찾는다.
+	filter := bson.M{"defaultName": defaultName}
+
+	// 업데이트 내용: $setOnInsert는 문서가 삽입될 때만 적용되며, $addToSet은 항상 적용된다.
+	update := bson.M{
+		"$setOnInsert": bson.M{
+			"defaultName": defaultName,
+			"insertedAt":  time.Now(),
+		},
+		"$addToSet": bson.M{"otherNames": originName},
+		"$set":      bson.M{"updatedAt": time.Now()},
+	}
+
+	// Upsert 옵션을 활성화한다.
+	opts := options.Update().SetUpsert(true)
+
+	// 컬렉션에서 upsert 실행
+	return cr.col.UpdateOne(ctx, filter, update, opts)
+
 }

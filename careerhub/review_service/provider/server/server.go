@@ -6,7 +6,6 @@ import (
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/provider_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/repo"
 	"github.com/jae2274/careerhub-review-service/common/domain/company"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ProviderGrpcServer struct {
@@ -20,22 +19,36 @@ func NewProviderGrpcServer(companyRepo *repo.CompanyRepo) *ProviderGrpcServer {
 	}
 }
 
+const (
+	CrawlingTaskCreated     = "created"
+	CrawlingTaskDuplicated  = "duplicated"
+	CrawlingTaskNotModified = "not_modified"
+)
+
 func (p *ProviderGrpcServer) AddCrawlingTask(ctx context.Context, in *provider_grpc.AddCrawlingTaskRequest) (*provider_grpc.AddCrawlingTaskResponse, error) {
-	err := p.companyRepo.AddCompany(ctx, &company.Company{
-		Name: "testCompany",
-	})
-
-	var status string = "created"
+	refinedName := company.RefineNameForSearch(in.CompanyName)
+	_, isExisted, err := p.companyRepo.FindCompany(ctx, refinedName, in.CompanyName)
 	if err != nil {
-		if !mongo.IsDuplicateKeyError(err) {
-			return nil, err
-		}
-
-		status = "duplicated"
+		return nil, err
 	}
 
-	return &provider_grpc.AddCrawlingTaskResponse{
-		Status: status,
-	}, nil
+	res := &provider_grpc.AddCrawlingTaskResponse{}
+	if isExisted {
+		res.Status = CrawlingTaskDuplicated
+		return res, nil
+	}
 
+	result, err := p.companyRepo.Save(ctx, refinedName, in.CompanyName)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if result.UpsertedCount > 0 {
+		res.Status = CrawlingTaskCreated
+	} else if result.ModifiedCount > 0 {
+		res.Status = CrawlingTaskNotModified
+	}
+
+	return res, nil
 }

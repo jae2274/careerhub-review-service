@@ -9,11 +9,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const NameField = "name"
+const (
+	DefaultNameField = "defaultName"
+	OtherNamesField  = "otherNames"
+)
 
 type Company struct {
-	Name       string    `bson:"name"`
-	InsertedAt time.Time `bson:"insertedAt"`
+	DefaultName string    `bson:"defaultName"`
+	OtherNames  []string  `bson:"otherNames"`
+	InsertedAt  time.Time `bson:"insertedAt"`
+	UpdatedAt   time.Time `bson:"updatedAt"`
 }
 
 func (*Company) Collection() string {
@@ -21,10 +26,10 @@ func (*Company) Collection() string {
 }
 
 func (*Company) IndexModels() map[string]*mongo.IndexModel {
-	indexName := fmt.Sprintf("%s_1", NameField)
+	indexName := fmt.Sprintf("%s_1", DefaultNameField)
 	return map[string]*mongo.IndexModel{
 		indexName: {
-			Keys:    bson.D{{Key: NameField, Value: 1}},
+			Keys:    bson.D{{Key: DefaultNameField, Value: 1}},
 			Options: options.Index().SetUnique(true),
 		},
 	}
