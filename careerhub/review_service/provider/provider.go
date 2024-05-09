@@ -6,6 +6,7 @@ import (
 	"net"
 
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/provider_grpc"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/repo"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/server"
 	"github.com/jae2274/careerhub-review-service/utils"
 	"github.com/jae2274/goutils/llog"
@@ -15,7 +16,8 @@ import (
 )
 
 func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
-	reviewGrpcServer := server.NewProviderGrpcServer()
+	companyRepo := repo.NewCompanyRepo(db)
+	reviewGrpcServer := server.NewProviderGrpcServer(companyRepo)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {
