@@ -76,7 +76,7 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 
 			_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
-				DefaultName:    companyName,
+				CompanyName:    companyName,
 				AvgScore:       45,
 				TotalPageCount: 10,
 			})
@@ -87,6 +87,31 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 
 		require.Empty(t, res.CompanyNames)
-
 	})
+
+	t.Run("return empty tasks when all not exist", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+		providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+		companyNames := []string{"testCompany1", "testCompany2"}
+		for _, companyName := range companyNames {
+			_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+				CompanyName: companyName,
+			})
+			require.NoError(t, err)
+
+			_, err = client.SetNotExist(ctx, &crawler_grpc.SetNotExistRequest{
+				CompanyName: companyName,
+			})
+			require.NoError(t, err)
+		}
+
+		res, err := client.GetCrawlingTasks(ctx, &emptypb.Empty{})
+		require.NoError(t, err)
+
+		require.Empty(t, res.CompanyNames)
+	})
+
 }

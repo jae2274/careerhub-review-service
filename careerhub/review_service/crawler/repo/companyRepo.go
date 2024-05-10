@@ -48,3 +48,16 @@ func (r *CompanyRepo) SetScoreNPage(ctx context.Context, defaultName string, tot
 	}
 	return r.col.UpdateOne(ctx, filter, update)
 }
+
+func (r *CompanyRepo) SetNotExist(ctx context.Context, defaultName string) (*mongo.UpdateResult, error) {
+	filter := bson.M{
+		company.DefaultNameField: defaultName,
+		company.StatusField:      company.Unknown,
+	}
+	update := bson.M{
+		"$set": bson.M{
+			company.StatusField: company.NotExist,
+		},
+	}
+	return r.col.UpdateOne(ctx, filter, update)
+}

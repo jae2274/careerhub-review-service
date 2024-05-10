@@ -39,9 +39,17 @@ func (s *ReviewGrpcServer) GetCrawlingTasks(ctx context.Context, _ *emptypb.Empt
 }
 
 func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.SetScoreNPageRequest) (*crawler_grpc.SetScoreNPageResponse, error) {
-	_, err := s.companyRepo.SetScoreNPage(context.Background(), in.DefaultName, in.TotalPageCount, in.AvgScore)
+	_, err := s.companyRepo.SetScoreNPage(context.Background(), in.CompanyName, in.TotalPageCount, in.AvgScore)
 	if err != nil {
 		return nil, err
 	}
 	return &crawler_grpc.SetScoreNPageResponse{}, nil
+}
+
+func (s *ReviewGrpcServer) SetNotExist(ctx context.Context, in *crawler_grpc.SetNotExistRequest) (*crawler_grpc.SetNotExistResponse, error) {
+	_, err := s.companyRepo.SetNotExist(context.Background(), in.CompanyName)
+	if err != nil {
+		return nil, err
+	}
+	return &crawler_grpc.SetNotExistResponse{}, nil
 }

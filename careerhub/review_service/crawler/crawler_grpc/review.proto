@@ -9,6 +9,7 @@ import "google/protobuf/empty.proto";
 service ReviewGrpc{
     rpc getCrawlingTasks(google.protobuf.Empty) returns (GetCrawlingTasksResponse);
     rpc setScoreNPage(SetScoreNPageRequest) returns  (SetScoreNPageResponse);
+    rpc setNotExist(SetNotExistRequest) returns (SetNotExistResponse);
 }
 
 message GetCrawlingTasksResponse{
@@ -16,11 +17,19 @@ message GetCrawlingTasksResponse{
 }
 
 message SetScoreNPageRequest{
-    string defaultName = 1;
+    string companyName = 1;
     int32 avgScore = 2;
     int32 totalPageCount = 3;
 }
 
 message SetScoreNPageResponse{
+    string status = 1;
+}
+
+message SetNotExistRequest{
+    string companyName = 1;
+}
+
+message SetNotExistResponse{
     string status = 1;
 }
