@@ -18,7 +18,7 @@ image_build:
 ## run: builds and runs the application
 run: build
 	@echo "Starting..."
-	@env MONGO_URI=${MONGO_URI} DB_NAME=${DB_NAME} PROVIDER_GRPC_PORT=${PROVIDER_GRPC_PORT} CRAWLER_GRPC_PORT=${CRAWLER_GRPC_PORT}  ./${BINARY_NAME} 
+	@env MONGO_URI=${MONGO_URI} DB_NAME=${DB_NAME} PROVIDER_GRPC_PORT=${PROVIDER_GRPC_PORT} CRAWLER_GRPC_PORT=${CRAWLER_GRPC_PORT} RESTAPI_GRPC_PORT=${RESTAPI_GRPC_PORT} ./${BINARY_NAME} 
 	@echo "Started!"
 
 ## clean: runs go clean and deletes binaries
@@ -43,10 +43,11 @@ restart: stop start
 proto:
 	@protoc careerhub/review_service/crawler/crawler_grpc/*.proto  --go_out=. --go-grpc_out=. --go-grpc_opt=paths=source_relative  --go_opt=paths=source_relative  --proto_path=.
 	@protoc careerhub/review_service/provider/provider_grpc/*.proto  --go_out=. --go-grpc_out=. --go-grpc_opt=paths=source_relative  --go_opt=paths=source_relative  --proto_path=.
+	@protoc careerhub/review_service/restapi/restapi_grpc/*.proto  --go_out=. --go-grpc_out=. --go-grpc_opt=paths=source_relative  --go_opt=paths=source_relative  --proto_path=.
 
 ## test: runs all tests
 test:	
 	@echo "Testing..."
-	@env MONGO_URI=${MONGO_URI} DB_NAME=${DB_NAME} PROVIDER_GRPC_PORT=${PROVIDER_GRPC_PORT} CRAWLER_GRPC_PORT=${CRAWLER_GRPC_PORT} go test -p 1 -timeout 60s ./test/...
+	@env MONGO_URI=${MONGO_URI} DB_NAME=${DB_NAME} PROVIDER_GRPC_PORT=${PROVIDER_GRPC_PORT} CRAWLER_GRPC_PORT=${CRAWLER_GRPC_PORT} RESTAPI_GRPC_PORT=${RESTAPI_GRPC_PORT} go test -p 1 -timeout 60s ./test/...
 	
 

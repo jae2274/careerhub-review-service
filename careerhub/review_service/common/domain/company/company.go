@@ -15,6 +15,7 @@ const (
 	ReviewSitesField = "reviewSites"
 	ReviewSites_Site = "reviewSites.site"
 	SiteField        = "site"
+	StatusField      = "status"
 	InsertedAtField  = "insertedAt"
 	UpdatedAtField   = "updatedAt"
 )

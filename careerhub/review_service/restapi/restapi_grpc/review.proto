@@ -8,7 +8,8 @@ service ReviewReaderGrpc{
 }
 
 message GetCompanyScoresRequest{
-    repeated string companyNames = 1;
+    string site = 1;
+    repeated string companyNames = 2;
 }
 
 message GetCompanyScoresResponse{

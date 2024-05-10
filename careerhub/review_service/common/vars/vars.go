@@ -17,6 +17,7 @@ type Vars struct {
 	DBUser           *DBUser
 	ProviderGrpcPort int
 	CrawlerGrpcPort  int
+	RestapiGrpcPort  int
 }
 
 type ErrNotExistedVar struct {
@@ -72,12 +73,23 @@ func Variables() (*Vars, error) {
 		return nil, fmt.Errorf("CRAWLER_GRPC_PORT is not integer.\tCRAWLER_GRPC_PORT: %s", crawlerGrpcPort)
 	}
 
+	restapiGrpcPort, err := getFromEnv("RESTAPI_GRPC_PORT")
+	if err != nil {
+		return nil, err
+	}
+
+	restapiGrpcPortInt, err := strconv.ParseInt(restapiGrpcPort, 10, 32)
+	if err != nil {
+		return nil, fmt.Errorf("RESTAPI_GRPC_PORT is not integer.\tRESTAPI_GRPC_PORT: %s", restapiGrpcPort)
+	}
+
 	return &Vars{
 		MongoUri:         mongoUri,
 		DBUser:           dbUser,
 		DbName:           dbName,
 		ProviderGrpcPort: int(providerGrpcPortInt),
 		CrawlerGrpcPort:  int(crawlerGrpcPortInt),
+		RestapiGrpcPort:  int(restapiGrpcPortInt),
 	}, nil
 }
 

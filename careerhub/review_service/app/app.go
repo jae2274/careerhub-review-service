@@ -8,6 +8,7 @@ import (
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/vars"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/restapi"
 	"github.com/jae2274/goutils/llog"
 	"github.com/jae2274/goutils/mw"
 )
@@ -57,6 +58,11 @@ func Run(ctx context.Context) {
 
 	go func() {
 		err := crawler.Run(ctx, envVars.CrawlerGrpcPort, db)
+		runErr <- err
+	}()
+
+	go func() {
+		err := restapi.Run(ctx, envVars.RestapiGrpcPort, db)
 		runErr <- err
 	}()
 
