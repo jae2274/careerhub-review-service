@@ -147,6 +147,35 @@ func TestReviewReaderGrpc(t *testing.T) {
 		require.Empty(t, res.CompanyScores)
 	})
 
+	t.Run("return empty companyScore by other site", func(t *testing.T) {
+		tinit.InitDB(t)
+
+		ctx := context.Background()
+
+		site := "testSite"
+		companyName := "testCompany"
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		_, err = crawlerClient.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
+			Site:           site,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			TotalPageCount: 10,
+		})
+		require.NoError(t, err)
+
+		res, err := restapiClient.GetCompanyScores(ctx, &restapi_grpc.GetCompanyScoresRequest{
+			Site:         "otherSite",
+			CompanyNames: []string{companyName},
+		})
+
+		require.NoError(t, err)
+		require.Empty(t, res.CompanyScores)
+	})
+
 	t.Run("return multiple companyScores", func(t *testing.T) {
 		tinit.InitDB(t)
 
@@ -200,6 +229,5 @@ func TestReviewReaderGrpc(t *testing.T) {
 			require.True(t, ok)
 			require.Equal(t, companyScore.AvgScore, resultScore)
 		}
-
 	})
 }
