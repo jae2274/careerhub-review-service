@@ -18,7 +18,7 @@ func TestCrawlingTaskGrpc(t *testing.T) {
 		tinit.InitDB(t)
 
 		ctx := context.Background()
-		client := tinit.InitProviderGrpcClient(t)
+		client := tinit.InitCrawlingTaskGrpcClient(t)
 		res, err := client.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
 			CompanyName: "testCompany",
 		})
@@ -31,7 +31,7 @@ func TestCrawlingTaskGrpc(t *testing.T) {
 		tinit.InitDB(t)
 
 		ctx := context.Background()
-		client := tinit.InitProviderGrpcClient(t)
+		client := tinit.InitCrawlingTaskGrpcClient(t)
 
 		_, err := client.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
 			CompanyName: "testCompany",
@@ -52,7 +52,7 @@ func TestCrawlingTaskGrpc(t *testing.T) {
 		tinit.InitDB(t)
 
 		ctx := context.Background()
-		client := tinit.InitProviderGrpcClient(t)
+		client := tinit.InitCrawlingTaskGrpcClient(t)
 
 		_, err := client.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
 			CompanyName: "testCompany",

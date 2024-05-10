@@ -10,15 +10,23 @@ import (
 )
 
 const (
-	DefaultNameField = "defaultName"
-	OtherNamesField  = "otherNames"
+	DefaultNameField         = "defaultName"
+	OtherNamesField          = "otherNames"
+	CurrentCrawlingPageField = "currentCrawlingPage"
+	AvgScoreField            = "avgScore"
+	StatusField              = "status"
+	InsertedAtField          = "insertedAt"
+	UpdatedAtField           = "updatedAt"
 )
 
 type Company struct {
-	DefaultName string    `bson:"defaultName"`
-	OtherNames  []string  `bson:"otherNames"`
-	InsertedAt  time.Time `bson:"insertedAt"`
-	UpdatedAt   time.Time `bson:"updatedAt"`
+	DefaultName         string    `bson:"defaultName"`
+	OtherNames          []string  `bson:"otherNames"`
+	AvgScore            int64     `bson:"avgScore"`
+	CurrentCrawlingPage int64     `bson:"currentCrawlingPage"`
+	Status              Status    `bson:"status"`
+	InsertedAt          time.Time `bson:"insertedAt"`
+	UpdatedAt           time.Time `bson:"updatedAt"`
 }
 
 func (*Company) Collection() string {

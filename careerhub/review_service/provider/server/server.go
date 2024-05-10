@@ -8,13 +8,13 @@ import (
 	"github.com/jae2274/careerhub-review-service/common/domain/company"
 )
 
-type ProviderGrpcServer struct {
+type CrawlingTaskGrpcServer struct {
 	companyRepo *repo.CompanyRepo
 	provider_grpc.UnimplementedCrawlingTaskGrpcServer
 }
 
-func NewProviderGrpcServer(companyRepo *repo.CompanyRepo) *ProviderGrpcServer {
-	return &ProviderGrpcServer{
+func NewCrawlingTaskGrpcServer(companyRepo *repo.CompanyRepo) *CrawlingTaskGrpcServer {
+	return &CrawlingTaskGrpcServer{
 		companyRepo: companyRepo,
 	}
 }
@@ -25,7 +25,7 @@ const (
 	CrawlingTaskNotModified = "not_modified"
 )
 
-func (p *ProviderGrpcServer) AddCrawlingTask(ctx context.Context, in *provider_grpc.AddCrawlingTaskRequest) (*provider_grpc.AddCrawlingTaskResponse, error) {
+func (p *CrawlingTaskGrpcServer) AddCrawlingTask(ctx context.Context, in *provider_grpc.AddCrawlingTaskRequest) (*provider_grpc.AddCrawlingTaskResponse, error) {
 	refinedName := company.RefineNameForSearch(in.CompanyName)
 	_, isExisted, err := p.companyRepo.FindCompany(ctx, refinedName, in.CompanyName)
 	if err != nil {

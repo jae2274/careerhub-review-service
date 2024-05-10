@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider"
 	"github.com/jae2274/careerhub-review-service/common/mongocfg"
 	"github.com/jae2274/careerhub-review-service/common/vars"
@@ -51,6 +52,11 @@ func Run(ctx context.Context) {
 
 	go func() {
 		err := provider.Run(ctx, envVars.ProviderGrpcPort, db)
+		runErr <- err
+	}()
+
+	go func() {
+		err := crawler.Run(ctx, envVars.CrawlerGrpcPort, db)
 		runErr <- err
 	}()
 

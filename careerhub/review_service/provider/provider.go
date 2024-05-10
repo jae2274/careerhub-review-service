@@ -17,7 +17,7 @@ import (
 
 func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
 	companyRepo := repo.NewCompanyRepo(db)
-	reviewGrpcServer := server.NewProviderGrpcServer(companyRepo)
+	reviewGrpcServer := server.NewCrawlingTaskGrpcServer(companyRepo)
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", grpcPort))
 	if err != nil {

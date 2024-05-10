@@ -3,6 +3,24 @@ syntax = "proto3";
 package careerhub.review_service.crawler_grpc;
 option go_package = "careerhub/review_service/crawler_grpc";
 
+import "google/protobuf/empty.proto";
+
+
 service ReviewGrpc{
-    
+    rpc getCrawlingTasks(google.protobuf.Empty) returns (GetCrawlingTasksResponse);
+    rpc setScoreNPage(SetScoreNPageRequest) returns  (SetScoreNPageResponse);
+}
+
+message GetCrawlingTasksResponse{
+    repeated string companyNames = 1;
+}
+
+message SetScoreNPageRequest{
+    string defaultName = 1;
+    int32 avgScore = 2;
+    int32 totalPageCount = 3;
+}
+
+message SetScoreNPageResponse{
+    string status = 1;
 }

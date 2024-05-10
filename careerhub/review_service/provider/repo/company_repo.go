@@ -40,16 +40,17 @@ func (cr *CompanyRepo) FindCompany(ctx context.Context, defaultName string, orig
 
 func (cr *CompanyRepo) Save(ctx context.Context, defaultName string, originName string) (*mongo.UpdateResult, error) {
 	// Upsert 필터: defaultName을 기준으로 문서를 찾는다.
-	filter := bson.M{"defaultName": defaultName}
+	filter := bson.M{company.DefaultNameField: defaultName}
 
 	// 업데이트 내용: $setOnInsert는 문서가 삽입될 때만 적용되며, $addToSet은 항상 적용된다.
 	update := bson.M{
 		"$setOnInsert": bson.M{
-			"defaultName": defaultName,
-			"insertedAt":  time.Now(),
+			company.DefaultNameField: defaultName,
+			company.InsertedAtField:  time.Now(),
+			company.StatusField:      company.Unknown,
 		},
-		"$addToSet": bson.M{"otherNames": originName},
-		"$set":      bson.M{"updatedAt": time.Now()},
+		"$addToSet": bson.M{company.OtherNamesField: originName},
+		"$set":      bson.M{company.UpdatedAtField: time.Now()},
 	}
 
 	// Upsert 옵션을 활성화한다.

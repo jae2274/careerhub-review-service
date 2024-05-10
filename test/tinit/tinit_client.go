@@ -7,14 +7,14 @@ import (
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/provider_grpc"
 )
 
-func InitCrawlingTaskGrpcClient(t *testing.T) crawler_grpc.ReviewGrpcClient {
+func InitReviewGrpcClient(t *testing.T) crawler_grpc.ReviewGrpcClient {
 	envVars := InitEnvVars(t)
 	conn := InitGrpcClient(t, envVars.CrawlerGrpcPort)
 
 	return crawler_grpc.NewReviewGrpcClient(conn)
 }
 
-func InitProviderGrpcClient(t *testing.T) provider_grpc.CrawlingTaskGrpcClient {
+func InitCrawlingTaskGrpcClient(t *testing.T) provider_grpc.CrawlingTaskGrpcClient {
 	envVars := InitEnvVars(t)
 	conn := InitGrpcClient(t, envVars.ProviderGrpcPort)
 
