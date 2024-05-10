@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/jae2274/careerhub-review-service/common/vars"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/vars"
 	"github.com/jae2274/goutils/terr"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

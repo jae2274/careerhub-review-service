@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/app"
-	"github.com/jae2274/careerhub-review-service/common/vars"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/vars"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

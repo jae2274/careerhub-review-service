@@ -4,10 +4,10 @@ import (
 	"context"
 	"os"
 
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/mongocfg"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/vars"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider"
-	"github.com/jae2274/careerhub-review-service/common/mongocfg"
-	"github.com/jae2274/careerhub-review-service/common/vars"
 	"github.com/jae2274/goutils/llog"
 	"github.com/jae2274/goutils/mw"
 )

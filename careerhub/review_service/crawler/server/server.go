@@ -3,9 +3,9 @@ package server
 import (
 	"context"
 
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/company"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler/crawler_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler/repo"
-	"github.com/jae2274/careerhub-review-service/common/domain/company"
 )
 
 type ReviewGrpcServer struct {

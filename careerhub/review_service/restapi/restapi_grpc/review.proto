@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package careerhub.review_service.restapi_grpc;
+option go_package = "careerhub/review_service/restapi_grpc";
+
+service ReviewReaderGrpc{
+    rpc GetCompanyScores(GetCompanyScoresRequest) returns (GetCompanyScoresResponse);
+}
+
+message GetCompanyScoresRequest{
+    repeated string companyNames = 1;
+}
+
+message GetCompanyScoresResponse{
+    map<string, int32> companyScores = 1;
+}

@@ -6,9 +6,9 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/jae2274/careerhub-review-service/common/domain/company"
-	"github.com/jae2274/careerhub-review-service/common/mongocfg"
-	"github.com/jae2274/careerhub-review-service/common/vars"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/company"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/mongocfg"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/vars"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )

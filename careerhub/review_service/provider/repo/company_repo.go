@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/jae2274/careerhub-review-service/common/domain/company"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/company"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

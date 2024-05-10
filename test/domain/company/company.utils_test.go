@@ -3,7 +3,7 @@ package company
 import (
 	"testing"
 
-	"github.com/jae2274/careerhub-review-service/common/domain/company"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/company"
 	"github.com/stretchr/testify/require"
 )
 
