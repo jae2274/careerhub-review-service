@@ -2,8 +2,8 @@ package server
 
 import (
 	"context"
-	"slices"
 
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/company"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/restapi/repo"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/restapi/restapi_grpc"
 )
@@ -20,21 +20,24 @@ func NewReviewReaderGrpcServer(companyRepo *repo.CompanyRepo) *ReviewReaderGrpcS
 }
 
 func (s *ReviewReaderGrpcServer) GetCompanyScores(ctx context.Context, in *restapi_grpc.GetCompanyScoresRequest) (*restapi_grpc.GetCompanyScoresResponse, error) {
-	companies, err := s.companyRepo.GetCompanies(ctx, in.Site, in.CompanyNames)
+	companyNamesMap := make(map[string]string)
+	defaultCompanyNames := make([]string, 0, len(in.CompanyNames))
+	for _, companyName := range in.CompanyNames {
+		defaultName := company.RefineNameForSearch(companyName)
+		companyNamesMap[defaultName] = companyName
+		defaultCompanyNames = append(defaultCompanyNames, defaultName)
+	}
+
+	companies, err := s.companyRepo.GetCompanies(ctx, in.Site, defaultCompanyNames)
 	if err != nil {
 		return nil, err
 	}
 
 	companyScores := make(map[string]int32)
-	for _, companyName := range in.CompanyNames {
-		for _, company := range companies {
-			if slices.Contains(company.OtherNames, companyName) {
-				for _, reviewSite := range company.ReviewSites {
-					if reviewSite.Site == in.Site {
-						companyScores[companyName] = reviewSite.AvgScore
-						break
-					}
-				}
+	for _, c := range companies {
+		for _, score := range c.ReviewSites {
+			if score.Site == in.Site {
+				companyScores[companyNamesMap[c.DefaultName]] = score.AvgScore
 			}
 		}
 	}

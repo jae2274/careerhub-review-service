@@ -24,11 +24,7 @@ func filterIncludeSite(site string) bson.M {
 
 func (r *CompanyRepo) GetCompanies(ctx context.Context, site string, companyNames []string) ([]*company.Company, error) {
 	filter := filterIncludeSite(site)
-	filter[company.OtherNamesField] = bson.M{
-		"$elemMatch": bson.M{
-			"$in": companyNames,
-		},
-	}
+	filter[company.DefaultNameField] = bson.M{"$in": companyNames}
 
 	cursor, err := r.col.Find(ctx, filter)
 	if err != nil {

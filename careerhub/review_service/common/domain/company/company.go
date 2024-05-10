@@ -40,10 +40,15 @@ func (*Company) Collection() string {
 }
 
 func (*Company) IndexModels() map[string]*mongo.IndexModel {
-	indexName := fmt.Sprintf("%s_1", DefaultNameField)
+	defaultNameIndex := fmt.Sprintf("%s_1", DefaultNameField)
+	otherNamesIndex := fmt.Sprintf("%s_1", OtherNamesField)
 	return map[string]*mongo.IndexModel{
-		indexName: {
+		defaultNameIndex: {
 			Keys:    bson.D{{Key: DefaultNameField, Value: 1}},
+			Options: options.Index().SetUnique(true),
+		},
+		otherNamesIndex: {
+			Keys:    bson.D{{Key: OtherNamesField, Value: 1}},
 			Options: options.Index().SetUnique(true),
 		},
 	}

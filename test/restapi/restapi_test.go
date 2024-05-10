@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/company"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler/crawler_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/provider_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/restapi/restapi_grpc"
@@ -75,7 +74,8 @@ func TestReviewReaderGrpc(t *testing.T) {
 			AvgScore:       45,
 			TotalPageCount: 10,
 		}
-		crawlerClient.SetScoreNPage(ctx, companyScore)
+		_, err = crawlerClient.SetScoreNPage(ctx, companyScore)
+		require.NoError(t, err)
 
 		res, err := restapiClient.GetCompanyScores(ctx, &restapi_grpc.GetCompanyScoresRequest{
 			Site:         site,
@@ -93,7 +93,7 @@ func TestReviewReaderGrpc(t *testing.T) {
 		ctx := context.Background()
 
 		site := "testSite"
-		companyName := "testCompany(주)"
+		companyName := "testCompany"
 		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
 			CompanyName: companyName,
 		})
@@ -101,19 +101,21 @@ func TestReviewReaderGrpc(t *testing.T) {
 
 		companyScore := &crawler_grpc.SetScoreNPageRequest{
 			Site:           site,
-			CompanyName:    company.RefineNameForSearch(companyName), //TODO: 테스트코드 리팩토링 필요
+			CompanyName:    companyName, //TODO: 테스트코드 리팩토링 필요
 			AvgScore:       45,
 			TotalPageCount: 10,
 		}
-		crawlerClient.SetScoreNPage(ctx, companyScore)
+		_, err = crawlerClient.SetScoreNPage(ctx, companyScore)
+		require.NoError(t, err)
 
+		synosymName := "testCompany(주식회사 테스트컴퍼니)"
 		res, err := restapiClient.GetCompanyScores(ctx, &restapi_grpc.GetCompanyScoresRequest{
 			Site:         site,
-			CompanyNames: []string{companyName},
+			CompanyNames: []string{synosymName},
 		})
 
 		require.NoError(t, err)
-		resultScore, ok := res.CompanyScores[companyName]
+		resultScore, ok := res.CompanyScores[synosymName]
 		require.True(t, ok)
 		require.Equal(t, companyScore.AvgScore, resultScore)
 	})
@@ -130,11 +132,11 @@ func TestReviewReaderGrpc(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		companyScore := &crawler_grpc.SetNotExistRequest{
+		_, err = crawlerClient.SetNotExist(ctx, &crawler_grpc.SetNotExistRequest{
 			Site:        site,
 			CompanyName: companyName,
-		}
-		crawlerClient.SetNotExist(ctx, companyScore)
+		})
+		require.NoError(t, err)
 
 		res, err := restapiClient.GetCompanyScores(ctx, &restapi_grpc.GetCompanyScoresRequest{
 			Site:         site,
@@ -143,5 +145,61 @@ func TestReviewReaderGrpc(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Empty(t, res.CompanyScores)
+	})
+
+	t.Run("return multiple companyScores", func(t *testing.T) {
+		tinit.InitDB(t)
+
+		ctx := context.Background()
+
+		site := "testSite"
+
+		companyScores := []*crawler_grpc.SetScoreNPageRequest{
+			{
+				Site:           site,
+				CompanyName:    "testCompany1",
+				AvgScore:       45,
+				TotalPageCount: 14,
+			},
+			{
+				Site:           site,
+				CompanyName:    "testCompany2",
+				AvgScore:       20,
+				TotalPageCount: 10,
+			},
+			{
+				Site:           site,
+				CompanyName:    "testCompany3",
+				AvgScore:       35,
+				TotalPageCount: 14,
+			},
+		}
+		for _, companyScore := range companyScores {
+			_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+				CompanyName: companyScore.CompanyName,
+			})
+			require.NoError(t, err)
+
+			_, err = crawlerClient.SetScoreNPage(ctx, companyScore)
+			require.NoError(t, err)
+		}
+
+		companyNames := make([]string, 0, len(companyScores))
+		for _, companyScore := range companyScores {
+			companyNames = append(companyNames, companyScore.CompanyName)
+		}
+
+		res, err := restapiClient.GetCompanyScores(ctx, &restapi_grpc.GetCompanyScoresRequest{
+			Site:         site,
+			CompanyNames: companyNames,
+		})
+
+		require.NoError(t, err)
+		for _, companyScore := range companyScores {
+			resultScore, ok := res.CompanyScores[companyScore.CompanyName]
+			require.True(t, ok)
+			require.Equal(t, companyScore.AvgScore, resultScore)
+		}
+
 	})
 }
