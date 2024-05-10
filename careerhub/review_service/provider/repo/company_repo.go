@@ -47,7 +47,7 @@ func (cr *CompanyRepo) Save(ctx context.Context, defaultName string, originName 
 		"$setOnInsert": bson.M{
 			company.DefaultNameField: defaultName,
 			company.InsertedAtField:  time.Now(),
-			company.StatusField:      company.Unknown,
+			company.ReviewSitesField: []*company.ReviewSite{},
 		},
 		"$addToSet": bson.M{company.OtherNamesField: originName},
 		"$set":      bson.M{company.UpdatedAtField: time.Now()},

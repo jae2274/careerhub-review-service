@@ -8,19 +8,19 @@ import (
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/provider_grpc"
 	"github.com/jae2274/careerhub-review-service/test/tinit"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func TestReviewGrpcClient(t *testing.T) {
 	cancelFunc := tinit.RunTestApp(t)
 	defer cancelFunc()
 
+	blindSite := "blind"
 	t.Run("return empty tasks when nothing saved", func(t *testing.T) {
 		ctx := context.Background()
 		tinit.InitDB(t)
 		client := tinit.InitReviewGrpcClient(t)
 
-		res, err := client.GetCrawlingTasks(ctx, &emptypb.Empty{})
+		res, err := client.GetCrawlingTasks(ctx, &crawler_grpc.GetCrawlingTasksRequest{Site: blindSite})
 		require.NoError(t, err)
 		require.Empty(t, res.CompanyNames)
 	})
@@ -37,7 +37,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		res, err := client.GetCrawlingTasks(ctx, &emptypb.Empty{})
+		res, err := client.GetCrawlingTasks(ctx, &crawler_grpc.GetCrawlingTasksRequest{Site: blindSite})
 		require.NoError(t, err)
 		require.Equal(t, []string{companyName}, res.CompanyNames)
 	})
@@ -56,7 +56,7 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 		}
 
-		res, err := client.GetCrawlingTasks(ctx, &emptypb.Empty{})
+		res, err := client.GetCrawlingTasks(ctx, &crawler_grpc.GetCrawlingTasksRequest{Site: blindSite})
 		require.NoError(t, err)
 
 		require.Equal(t, companyNames, res.CompanyNames)
@@ -76,6 +76,7 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 
 			_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
+				Site:           blindSite,
 				CompanyName:    companyName,
 				AvgScore:       45,
 				TotalPageCount: 10,
@@ -83,7 +84,7 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 		}
 
-		res, err := client.GetCrawlingTasks(ctx, &emptypb.Empty{})
+		res, err := client.GetCrawlingTasks(ctx, &crawler_grpc.GetCrawlingTasksRequest{Site: blindSite})
 		require.NoError(t, err)
 
 		require.Empty(t, res.CompanyNames)
@@ -103,15 +104,41 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 
 			_, err = client.SetNotExist(ctx, &crawler_grpc.SetNotExistRequest{
+				Site:        blindSite,
 				CompanyName: companyName,
 			})
 			require.NoError(t, err)
 		}
 
-		res, err := client.GetCrawlingTasks(ctx, &emptypb.Empty{})
+		res, err := client.GetCrawlingTasks(ctx, &crawler_grpc.GetCrawlingTasksRequest{Site: blindSite})
 		require.NoError(t, err)
 
 		require.Empty(t, res.CompanyNames)
 	})
 
+	t.Run("return tasks regardless of other review site", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+		providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+		companyNames := []string{"testCompany1", "testCompany2"}
+		for _, companyName := range companyNames {
+			_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+				CompanyName: companyName,
+			})
+			require.NoError(t, err)
+
+			_, err = client.SetNotExist(ctx, &crawler_grpc.SetNotExistRequest{
+				Site:        blindSite,
+				CompanyName: companyName,
+			})
+			require.NoError(t, err)
+		}
+
+		res, err := client.GetCrawlingTasks(ctx, &crawler_grpc.GetCrawlingTasksRequest{Site: "otherSite"})
+		require.NoError(t, err)
+
+		require.Equal(t, companyNames, res.CompanyNames)
+	})
 }

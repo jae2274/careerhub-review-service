@@ -11,7 +11,6 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
-	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -23,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ReviewGrpcClient interface {
-	GetCrawlingTasks(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCrawlingTasksResponse, error)
+	GetCrawlingTasks(ctx context.Context, in *GetCrawlingTasksRequest, opts ...grpc.CallOption) (*GetCrawlingTasksResponse, error)
 	SetScoreNPage(ctx context.Context, in *SetScoreNPageRequest, opts ...grpc.CallOption) (*SetScoreNPageResponse, error)
 	SetNotExist(ctx context.Context, in *SetNotExistRequest, opts ...grpc.CallOption) (*SetNotExistResponse, error)
 }
@@ -36,7 +35,7 @@ func NewReviewGrpcClient(cc grpc.ClientConnInterface) ReviewGrpcClient {
 	return &reviewGrpcClient{cc}
 }
 
-func (c *reviewGrpcClient) GetCrawlingTasks(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetCrawlingTasksResponse, error) {
+func (c *reviewGrpcClient) GetCrawlingTasks(ctx context.Context, in *GetCrawlingTasksRequest, opts ...grpc.CallOption) (*GetCrawlingTasksResponse, error) {
 	out := new(GetCrawlingTasksResponse)
 	err := c.cc.Invoke(ctx, "/careerhub.review_service.crawler_grpc.ReviewGrpc/getCrawlingTasks", in, out, opts...)
 	if err != nil {
@@ -67,7 +66,7 @@ func (c *reviewGrpcClient) SetNotExist(ctx context.Context, in *SetNotExistReque
 // All implementations must embed UnimplementedReviewGrpcServer
 // for forward compatibility
 type ReviewGrpcServer interface {
-	GetCrawlingTasks(context.Context, *emptypb.Empty) (*GetCrawlingTasksResponse, error)
+	GetCrawlingTasks(context.Context, *GetCrawlingTasksRequest) (*GetCrawlingTasksResponse, error)
 	SetScoreNPage(context.Context, *SetScoreNPageRequest) (*SetScoreNPageResponse, error)
 	SetNotExist(context.Context, *SetNotExistRequest) (*SetNotExistResponse, error)
 	mustEmbedUnimplementedReviewGrpcServer()
@@ -77,7 +76,7 @@ type ReviewGrpcServer interface {
 type UnimplementedReviewGrpcServer struct {
 }
 
-func (UnimplementedReviewGrpcServer) GetCrawlingTasks(context.Context, *emptypb.Empty) (*GetCrawlingTasksResponse, error) {
+func (UnimplementedReviewGrpcServer) GetCrawlingTasks(context.Context, *GetCrawlingTasksRequest) (*GetCrawlingTasksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCrawlingTasks not implemented")
 }
 func (UnimplementedReviewGrpcServer) SetScoreNPage(context.Context, *SetScoreNPageRequest) (*SetScoreNPageResponse, error) {
@@ -100,7 +99,7 @@ func RegisterReviewGrpcServer(s grpc.ServiceRegistrar, srv ReviewGrpcServer) {
 }
 
 func _ReviewGrpc_GetCrawlingTasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(emptypb.Empty)
+	in := new(GetCrawlingTasksRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -112,7 +111,7 @@ func _ReviewGrpc_GetCrawlingTasks_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: "/careerhub.review_service.crawler_grpc.ReviewGrpc/getCrawlingTasks",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReviewGrpcServer).GetCrawlingTasks(ctx, req.(*emptypb.Empty))
+		return srv.(ReviewGrpcServer).GetCrawlingTasks(ctx, req.(*GetCrawlingTasksRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

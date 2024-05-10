@@ -2,7 +2,7 @@ BINARY_NAME=myapp
 CODE_DIR=./careerhub/review_service
 CONTAINER_IMAGE_NAME=careerhub-review-service
 
-# include test.env
+include test.env
 
 ## build: Build binary
 build:
@@ -18,7 +18,7 @@ image_build:
 ## run: builds and runs the application
 run: build
 	@echo "Starting..."
-	@env ./${BINARY_NAME} 
+	@env MONGO_URI=${MONGO_URI} DB_NAME=${DB_NAME} PROVIDER_GRPC_PORT=${PROVIDER_GRPC_PORT} CRAWLER_GRPC_PORT=${CRAWLER_GRPC_PORT}  ./${BINARY_NAME} 
 	@echo "Started!"
 
 ## clean: runs go clean and deletes binaries
@@ -47,6 +47,6 @@ proto:
 ## test: runs all tests
 test:	
 	@echo "Testing..."
-	@env go test -p 1 -timeout 60s ./test/...
+	@env MONGO_URI=${MONGO_URI} DB_NAME=${DB_NAME} PROVIDER_GRPC_PORT=${PROVIDER_GRPC_PORT} CRAWLER_GRPC_PORT=${CRAWLER_GRPC_PORT} go test -p 1 -timeout 60s ./test/...
 	
 

@@ -5,7 +5,7 @@ import (
 
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler/crawler_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler/repo"
-	"google.golang.org/protobuf/types/known/emptypb"
+	"github.com/jae2274/careerhub-review-service/common/domain/company"
 )
 
 type ReviewGrpcServer struct {
@@ -21,8 +21,8 @@ func NewReviewGrpcServer(
 	}
 }
 
-func (s *ReviewGrpcServer) GetCrawlingTasks(ctx context.Context, _ *emptypb.Empty) (*crawler_grpc.GetCrawlingTasksResponse, error) {
-	companies, err := s.companyRepo.GetCrawlingTasks(ctx)
+func (s *ReviewGrpcServer) GetCrawlingTasks(ctx context.Context, in *crawler_grpc.GetCrawlingTasksRequest) (*crawler_grpc.GetCrawlingTasksResponse, error) {
+	companies, err := s.companyRepo.GetCrawlingTasks(ctx, in.Site)
 
 	if err != nil {
 		return nil, err
@@ -39,7 +39,12 @@ func (s *ReviewGrpcServer) GetCrawlingTasks(ctx context.Context, _ *emptypb.Empt
 }
 
 func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.SetScoreNPageRequest) (*crawler_grpc.SetScoreNPageResponse, error) {
-	_, err := s.companyRepo.SetScoreNPage(context.Background(), in.CompanyName, in.TotalPageCount, in.AvgScore)
+	_, err := s.companyRepo.SetScoreNPage(context.Background(), in.CompanyName, &company.ReviewSite{
+		Site:                in.Site,
+		Status:              company.Exist,
+		AvgScore:            in.AvgScore,
+		CurrentCrawlingPage: in.TotalPageCount,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +52,7 @@ func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.S
 }
 
 func (s *ReviewGrpcServer) SetNotExist(ctx context.Context, in *crawler_grpc.SetNotExistRequest) (*crawler_grpc.SetNotExistResponse, error) {
-	_, err := s.companyRepo.SetNotExist(context.Background(), in.CompanyName)
+	_, err := s.companyRepo.SetNotExist(context.Background(), in.CompanyName, in.Site)
 	if err != nil {
 		return nil, err
 	}

@@ -18,10 +18,12 @@ func NewCompanyRepo(db *mongo.Database) *CompanyRepo {
 	}
 }
 
-func (r *CompanyRepo) GetCrawlingTasks(ctx context.Context) ([]*company.Company, error) {
-	cur, err := r.col.Find(ctx, bson.M{
-		company.StatusField: company.Unknown,
-	})
+func filterNotIncludeSite(site string) bson.M {
+	return bson.M{company.ReviewSitesField: bson.M{"$not": bson.M{"$elemMatch": bson.M{company.SiteField: site}}}}
+}
+
+func (r *CompanyRepo) GetCrawlingTasks(ctx context.Context, site string) ([]*company.Company, error) {
+	cur, err := r.col.Find(ctx, filterNotIncludeSite(site))
 	if err != nil {
 		return nil, err
 	}
@@ -34,30 +36,26 @@ func (r *CompanyRepo) GetCrawlingTasks(ctx context.Context) ([]*company.Company,
 	return companies, nil
 }
 
-func (r *CompanyRepo) SetScoreNPage(ctx context.Context, defaultName string, totalPageCount int32, avgScore int32) (*mongo.UpdateResult, error) {
-	filter := bson.M{
-		company.DefaultNameField: defaultName,
-		company.StatusField:      company.Unknown,
-	}
+func (r *CompanyRepo) SetScoreNPage(ctx context.Context, defaultName string, reviewSite *company.ReviewSite) (*mongo.UpdateResult, error) {
+	filter := filterNotIncludeSite(reviewSite.Site)
+	filter[company.DefaultNameField] = defaultName
+
 	update := bson.M{
-		"$set": bson.M{
-			company.CurrentCrawlingPageField: totalPageCount,
-			company.AvgScoreField:            avgScore,
-			company.StatusField:              company.Exist,
-		},
+		"$push": bson.M{company.ReviewSitesField: reviewSite},
 	}
 	return r.col.UpdateOne(ctx, filter, update)
 }
 
-func (r *CompanyRepo) SetNotExist(ctx context.Context, defaultName string) (*mongo.UpdateResult, error) {
-	filter := bson.M{
-		company.DefaultNameField: defaultName,
-		company.StatusField:      company.Unknown,
+func (r *CompanyRepo) SetNotExist(ctx context.Context, defaultName string, site string) (*mongo.UpdateResult, error) {
+	filter := filterNotIncludeSite(site)
+	filter[company.DefaultNameField] = defaultName
+
+	reviewSite := &company.ReviewSite{
+		Site:   site,
+		Status: company.NotExist,
 	}
 	update := bson.M{
-		"$set": bson.M{
-			company.StatusField: company.NotExist,
-		},
+		"$push": bson.M{company.ReviewSitesField: reviewSite},
 	}
 	return r.col.UpdateOne(ctx, filter, update)
 }
