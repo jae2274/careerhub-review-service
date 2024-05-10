@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/jae2274/careerhub-review-service/common/domain/company"
 	"go.mongodb.org/mongo-driver/bson"
@@ -36,17 +37,27 @@ func (r *CompanyRepo) GetCrawlingTasks(ctx context.Context, site string) ([]*com
 	return companies, nil
 }
 
-func (r *CompanyRepo) SetScoreNPage(ctx context.Context, defaultName string, reviewSite *company.ReviewSite) (*mongo.UpdateResult, error) {
+func (r *CompanyRepo) SetScoreNPage(ctx context.Context, defaultName string, reviewSite *company.ReviewSite) error {
 	filter := filterNotIncludeSite(reviewSite.Site)
 	filter[company.DefaultNameField] = defaultName
 
 	update := bson.M{
 		"$push": bson.M{company.ReviewSitesField: reviewSite},
 	}
-	return r.col.UpdateOne(ctx, filter, update)
+
+	result, err := r.col.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("matched count is 0. company: %s, site: %s", defaultName, reviewSite.Site)
+	}
+
+	return nil
 }
 
-func (r *CompanyRepo) SetNotExist(ctx context.Context, defaultName string, site string) (*mongo.UpdateResult, error) {
+func (r *CompanyRepo) SetNotExist(ctx context.Context, defaultName string, site string) error {
 	filter := filterNotIncludeSite(site)
 	filter[company.DefaultNameField] = defaultName
 
@@ -57,5 +68,15 @@ func (r *CompanyRepo) SetNotExist(ctx context.Context, defaultName string, site 
 	update := bson.M{
 		"$push": bson.M{company.ReviewSitesField: reviewSite},
 	}
-	return r.col.UpdateOne(ctx, filter, update)
+
+	result, err := r.col.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("matched count is 0. company: %s, site: %s", defaultName, site)
+	}
+
+	return nil
 }

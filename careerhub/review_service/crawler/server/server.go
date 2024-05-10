@@ -39,7 +39,7 @@ func (s *ReviewGrpcServer) GetCrawlingTasks(ctx context.Context, in *crawler_grp
 }
 
 func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.SetScoreNPageRequest) (*crawler_grpc.SetScoreNPageResponse, error) {
-	_, err := s.companyRepo.SetScoreNPage(context.Background(), in.CompanyName, &company.ReviewSite{
+	err := s.companyRepo.SetScoreNPage(context.Background(), in.CompanyName, &company.ReviewSite{
 		Site:                in.Site,
 		Status:              company.Exist,
 		AvgScore:            in.AvgScore,
@@ -52,7 +52,7 @@ func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.S
 }
 
 func (s *ReviewGrpcServer) SetNotExist(ctx context.Context, in *crawler_grpc.SetNotExistRequest) (*crawler_grpc.SetNotExistResponse, error) {
-	_, err := s.companyRepo.SetNotExist(context.Background(), in.CompanyName, in.Site)
+	err := s.companyRepo.SetNotExist(context.Background(), in.CompanyName, in.Site)
 	if err != nil {
 		return nil, err
 	}

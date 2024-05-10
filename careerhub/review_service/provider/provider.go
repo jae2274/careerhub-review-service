@@ -24,7 +24,7 @@ func Run(ctx context.Context, grpcPort int, db *mongo.Database) error {
 		return terr.Wrap(err)
 	}
 
-	llog.Msg("Start suggester grpc server").Level(llog.INFO).Data("port", grpcPort).Log(ctx)
+	llog.Msg("Start provider grpc server").Level(llog.INFO).Data("port", grpcPort).Log(ctx)
 
 	grpcServer := grpc.NewServer(utils.Middlewares()...)
 	provider_grpc.RegisterCrawlingTaskGrpcServer(grpcServer, reviewGrpcServer)

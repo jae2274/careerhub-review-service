@@ -141,4 +141,140 @@ func TestReviewGrpcClient(t *testing.T) {
 
 		require.Equal(t, companyNames, res.CompanyNames)
 	})
+
+	t.Run("can't update score and pageCount if not saved", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+
+		_, err := client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
+			Site:           blindSite,
+			CompanyName:    "testCompany",
+			AvgScore:       45,
+			TotalPageCount: 10,
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("can't update score and pageCount several times", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+		providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+		companyName := "testCompany"
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			TotalPageCount: 10,
+		})
+		require.NoError(t, err)
+
+		_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			TotalPageCount: 10,
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("can't update status not_exist if not saved", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+
+		_, err := client.SetNotExist(ctx, &crawler_grpc.SetNotExistRequest{
+			Site:        blindSite,
+			CompanyName: "testCompany",
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("can't update status not_exist several times", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+		providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+		companyName := "testCompany"
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		_, err = client.SetNotExist(ctx, &crawler_grpc.SetNotExistRequest{
+			Site:        blindSite,
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		_, err = client.SetNotExist(ctx, &crawler_grpc.SetNotExistRequest{
+			Site:        blindSite,
+			CompanyName: companyName,
+		})
+		require.Error(t, err)
+	})
+
+	t.Run("can't update different status", func(t *testing.T) {
+		t.Run("update not_exist after score and pageCount", func(t *testing.T) {
+			ctx := context.Background()
+			tinit.InitDB(t)
+			client := tinit.InitReviewGrpcClient(t)
+			providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+			companyName := "testCompany"
+			_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+				CompanyName: companyName,
+			})
+			require.NoError(t, err)
+
+			_, err = client.SetNotExist(ctx, &crawler_grpc.SetNotExistRequest{
+				Site:        blindSite,
+				CompanyName: companyName,
+			})
+			require.NoError(t, err)
+
+			_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
+				Site:           blindSite,
+				CompanyName:    companyName,
+				AvgScore:       45,
+				TotalPageCount: 10,
+			})
+			require.Error(t, err)
+		})
+
+		t.Run("update score and pageCount after not_exist", func(t *testing.T) {
+			ctx := context.Background()
+			tinit.InitDB(t)
+			client := tinit.InitReviewGrpcClient(t)
+			providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+			companyName := "testCompany"
+			_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+				CompanyName: companyName,
+			})
+			require.NoError(t, err)
+
+			_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
+				Site:           blindSite,
+				CompanyName:    companyName,
+				AvgScore:       45,
+				TotalPageCount: 10,
+			})
+			require.NoError(t, err)
+
+			_, err = client.SetNotExist(ctx, &crawler_grpc.SetNotExistRequest{
+				Site:        blindSite,
+				CompanyName: companyName,
+			})
+			require.Error(t, err)
+		})
+	})
 }
