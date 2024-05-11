@@ -6,6 +6,7 @@ import (
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/company"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler/crawler_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler/repo"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type ReviewGrpcServer struct {
@@ -38,7 +39,7 @@ func (s *ReviewGrpcServer) GetCrawlingTasks(ctx context.Context, in *crawler_grp
 	}, nil
 }
 
-func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.SetScoreNPageRequest) (*crawler_grpc.SetScoreNPageResponse, error) {
+func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.SetScoreNPageRequest) (*emptypb.Empty, error) {
 	err := s.companyRepo.SetScoreNPage(context.Background(), company.RefineNameForSearch(in.CompanyName), &company.ReviewSite{
 		Site:                in.Site,
 		Status:              company.Exist,
@@ -49,15 +50,15 @@ func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.S
 	if err != nil {
 		return nil, err
 	}
-	return &crawler_grpc.SetScoreNPageResponse{}, nil
+	return &emptypb.Empty{}, nil
 }
 
-func (s *ReviewGrpcServer) SetNotExist(ctx context.Context, in *crawler_grpc.SetNotExistRequest) (*crawler_grpc.SetNotExistResponse, error) {
+func (s *ReviewGrpcServer) SetNotExist(ctx context.Context, in *crawler_grpc.SetNotExistRequest) (*emptypb.Empty, error) {
 	err := s.companyRepo.SetNotExist(context.Background(), company.RefineNameForSearch(in.CompanyName), in.Site)
 	if err != nil {
 		return nil, err
 	}
-	return &crawler_grpc.SetNotExistResponse{}, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *ReviewGrpcServer) GetCrawlingPages(ctx context.Context, in *crawler_grpc.GetCrawlingPagesRequest) (*crawler_grpc.GetCrawlingPagesResponse, error) {
