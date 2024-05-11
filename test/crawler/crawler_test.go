@@ -80,6 +80,7 @@ func TestReviewGrpcClient(t *testing.T) {
 				CompanyName:    companyName,
 				AvgScore:       45,
 				TotalPageCount: 10,
+				PageSize:       15,
 			})
 			require.NoError(t, err)
 		}
@@ -152,6 +153,7 @@ func TestReviewGrpcClient(t *testing.T) {
 			CompanyName:    "testCompany",
 			AvgScore:       45,
 			TotalPageCount: 10,
+			PageSize:       15,
 		})
 		require.Error(t, err)
 	})
@@ -173,6 +175,7 @@ func TestReviewGrpcClient(t *testing.T) {
 			CompanyName:    companyName,
 			AvgScore:       45,
 			TotalPageCount: 10,
+			PageSize:       15,
 		})
 		require.NoError(t, err)
 
@@ -181,6 +184,7 @@ func TestReviewGrpcClient(t *testing.T) {
 			CompanyName:    companyName,
 			AvgScore:       45,
 			TotalPageCount: 10,
+			PageSize:       15,
 		})
 		require.Error(t, err)
 	})
@@ -246,6 +250,7 @@ func TestReviewGrpcClient(t *testing.T) {
 				CompanyName:    companyName,
 				AvgScore:       45,
 				TotalPageCount: 10,
+				PageSize:       15,
 			})
 			require.Error(t, err)
 		})
@@ -267,6 +272,7 @@ func TestReviewGrpcClient(t *testing.T) {
 				CompanyName:    companyName,
 				AvgScore:       45,
 				TotalPageCount: 10,
+				PageSize:       15,
 			})
 			require.NoError(t, err)
 

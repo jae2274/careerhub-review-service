@@ -33,6 +33,7 @@ type ReviewSite struct {
 	Status              Status `bson:"status"`
 	AvgScore            int32  `bson:"avgScore"`
 	CurrentCrawlingPage int32  `bson:"currentCrawlingPage"`
+	PageSize            int32  `bson:"pageSize"`
 }
 
 func (*Company) Collection() string {

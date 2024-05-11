@@ -44,6 +44,7 @@ func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.S
 		Status:              company.Exist,
 		AvgScore:            in.AvgScore,
 		CurrentCrawlingPage: in.TotalPageCount,
+		PageSize:            in.PageSize,
 	})
 	if err != nil {
 		return nil, err
