@@ -18,12 +18,8 @@ func NewCompanyRepo(col *mongo.Database) *CompanyRepo {
 	}
 }
 
-func filterIncludeSite(site string) bson.M {
-	return bson.M{company.ReviewSitesField: bson.M{"$elemMatch": bson.M{company.SiteField: site, company.StatusField: company.Exist}}}
-}
-
 func (r *CompanyRepo) GetCompanies(ctx context.Context, site string, companyNames []string) ([]*company.Company, error) {
-	filter := filterIncludeSite(site)
+	filter := company.FilterIncludeSite(site)
 	filter[company.DefaultNameField] = bson.M{"$in": companyNames}
 
 	cursor, err := r.col.Find(ctx, filter)

@@ -19,12 +19,8 @@ func NewCompanyRepo(db *mongo.Database) *CompanyRepo {
 	}
 }
 
-func filterNotIncludeSite(site string) bson.M {
-	return bson.M{company.ReviewSitesField: bson.M{"$not": bson.M{"$elemMatch": bson.M{company.SiteField: site}}}}
-}
-
 func (r *CompanyRepo) GetCrawlingTasks(ctx context.Context, site string) ([]*company.Company, error) {
-	cur, err := r.col.Find(ctx, filterNotIncludeSite(site))
+	cur, err := r.col.Find(ctx, company.FilterNotIncludeSite(site))
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +34,7 @@ func (r *CompanyRepo) GetCrawlingTasks(ctx context.Context, site string) ([]*com
 }
 
 func (r *CompanyRepo) SetScoreNPage(ctx context.Context, defaultName string, reviewSite *company.ReviewSite) error {
-	filter := filterNotIncludeSite(reviewSite.Site)
+	filter := company.FilterNotIncludeSite(reviewSite.Site)
 	filter[company.DefaultNameField] = defaultName
 
 	update := bson.M{
@@ -58,7 +54,7 @@ func (r *CompanyRepo) SetScoreNPage(ctx context.Context, defaultName string, rev
 }
 
 func (r *CompanyRepo) SetNotExist(ctx context.Context, defaultName string, site string) error {
-	filter := filterNotIncludeSite(site)
+	filter := company.FilterNotIncludeSite(site)
 	filter[company.DefaultNameField] = defaultName
 
 	reviewSite := &company.ReviewSite{
@@ -79,4 +75,19 @@ func (r *CompanyRepo) SetNotExist(ctx context.Context, defaultName string, site 
 	}
 
 	return nil
+}
+
+func (r *CompanyRepo) GetCrawlingTargets(ctx context.Context, site string) ([]*company.Company, error) {
+	filter := bson.M{company.ReviewSitesField: bson.M{"$elemMatch": bson.M{company.SiteField: site, company.StatusField: company.Exist, company.CurrentCrawlingPageField: bson.M{"$gt": 0}}}}
+	cur, err := r.col.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var companies []*company.Company
+	if err := cur.All(ctx, &companies); err != nil {
+		return nil, err
+	}
+
+	return companies, nil
 }

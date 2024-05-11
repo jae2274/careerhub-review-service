@@ -59,3 +59,27 @@ func (s *ReviewGrpcServer) SetNotExist(ctx context.Context, in *crawler_grpc.Set
 	}
 	return &crawler_grpc.SetNotExistResponse{}, nil
 }
+
+func (s *ReviewGrpcServer) GetCrawlingPages(ctx context.Context, in *crawler_grpc.GetCrawlingPagesRequest) (*crawler_grpc.GetCrawlingPagesResponse, error) {
+	companies, err := s.companyRepo.GetCrawlingTargets(ctx, in.Site)
+	if err != nil {
+		return nil, err
+	}
+
+	crawlingPages := make([]*crawler_grpc.CrawlingPage, 0)
+	for _, company := range companies {
+		for _, reviewSite := range company.ReviewSites {
+			if reviewSite.Site == in.Site {
+				crawlingPages = append(crawlingPages, &crawler_grpc.CrawlingPage{
+					CompanyName:         company.DefaultName,
+					CurrentCrawlingPage: reviewSite.CurrentCrawlingPage,
+					PageSize:            reviewSite.PageSize,
+				})
+				break
+			}
+		}
+	}
+	return &crawler_grpc.GetCrawlingPagesResponse{
+		CrawlingPages: crawlingPages,
+	}, nil
+}

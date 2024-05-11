@@ -9,6 +9,8 @@ service ReviewGrpc{
     rpc getCrawlingTasks(GetCrawlingTasksRequest) returns (GetCrawlingTasksResponse);
     rpc setScoreNPage(SetScoreNPageRequest) returns  (SetScoreNPageResponse);
     rpc setNotExist(SetNotExistRequest) returns (SetNotExistResponse);
+
+    rpc getCrawlingPages(GetCrawlingPagesRequest) returns (GetCrawlingPagesResponse);
 }
 
 message GetCrawlingTasksRequest{
@@ -38,4 +40,18 @@ message SetNotExistRequest{
 
 message SetNotExistResponse{
     string status = 1;
+}
+
+message GetCrawlingPagesRequest{
+    string site = 1;
+}
+
+message GetCrawlingPagesResponse{
+    repeated CrawlingPage crawlingPages = 1;
+}
+
+message CrawlingPage{
+    string companyName = 1;
+    int32 currentCrawlingPage = 2;
+    int32 pageSize = 3;
 }

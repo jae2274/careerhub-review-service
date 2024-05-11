@@ -283,4 +283,137 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.Error(t, err)
 		})
 	})
+
+	t.Run("return empty crawling page when nothing saved", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+
+		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
+		require.NoError(t, err)
+		require.Empty(t, res.CrawlingPages)
+	})
+
+	t.Run("return empty crawling page until update score N page", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+		providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+		companyName := "testCompany"
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
+		require.NoError(t, err)
+		require.Empty(t, res.CrawlingPages)
+	})
+
+	t.Run("return crawling page after update score N page", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+		providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+		companyName := "testCompany"
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		companyInfo := &crawler_grpc.SetScoreNPageRequest{
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			TotalPageCount: 10,
+			PageSize:       15,
+		}
+		_, err = client.SetScoreNPage(ctx, companyInfo)
+		require.NoError(t, err)
+
+		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
+		require.NoError(t, err)
+		require.Len(t, res.CrawlingPages, 1)
+		require.Equal(t, companyInfo.TotalPageCount, res.CrawlingPages[0].CurrentCrawlingPage)
+		require.Equal(t, companyInfo.PageSize, res.CrawlingPages[0].PageSize)
+	})
+
+	t.Run("return empty crawling page after update not_exist", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+		providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+		companyName := "testCompany"
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		_, err = client.SetNotExist(ctx, &crawler_grpc.SetNotExistRequest{
+			Site:        blindSite,
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
+		require.NoError(t, err)
+		require.Empty(t, res.CrawlingPages)
+	})
+
+	t.Run("return empty crawling page after update pageCount zero", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+		providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+		companyName := "testCompany"
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		companyInfo := &crawler_grpc.SetScoreNPageRequest{
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			TotalPageCount: 0,
+			PageSize:       15,
+		}
+		_, err = client.SetScoreNPage(ctx, companyInfo)
+		require.NoError(t, err)
+
+		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
+		require.NoError(t, err)
+		require.Empty(t, res.CrawlingPages)
+	})
+
+	t.Run("return empty crawling page regardless other site", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+		providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+		companyName := "testCompany"
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		companyInfo := &crawler_grpc.SetScoreNPageRequest{
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			TotalPageCount: 10,
+			PageSize:       15,
+		}
+		_, err = client.SetScoreNPage(ctx, companyInfo)
+		require.NoError(t, err)
+
+		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: "otherSite"})
+		require.NoError(t, err)
+		require.Empty(t, res.CrawlingPages)
+	})
 }
