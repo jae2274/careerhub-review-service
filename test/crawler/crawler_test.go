@@ -462,34 +462,44 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.EqualValues(t, 2, res.InsertedCount)
 	})
 
-	t.Run("ignore same company reviews", func(t *testing.T) { //멱등성
+	t.Run("ignore same company reviews(site, companyName, summary, reviewUserId)", func(t *testing.T) { //멱등성
 		ctx := context.Background()
 		tinit.InitDB(t)
 		client := tinit.InitReviewGrpcClient(t)
 
 		companyName := "testCompany"
-		sameReview := &crawler_grpc.Review{
-			Score:            45,
+		review := &crawler_grpc.Review{
 			Summary:          "testSummary",
-			EmploymentStatus: true,
 			ReviewUserId:     "testUserId",
+			Score:            45,
+			EmploymentStatus: true,
 			JobType:          "testJobType",
 			UnixMilli:        time.Now().UnixMilli(),
 		}
 
+		sameReview := &crawler_grpc.Review{
+			Summary:          "testSummary",
+			ReviewUserId:     "testUserId",
+			Score:            100,                    //다른 값
+			EmploymentStatus: false,                  //다른 값
+			JobType:          "diffJobType",          //다른 값
+			UnixMilli:        time.Now().UnixMilli(), //다른 값
+		}
 		otherReview := &crawler_grpc.Review{
-			Score:            45,
 			Summary:          "otherSummary",
-			EmploymentStatus: true,
 			ReviewUserId:     "otherUserId",
+			Score:            100,
+			EmploymentStatus: false,
 			JobType:          "otherJobType",
 			UnixMilli:        time.Now().UnixMilli(),
 		}
 
+		reviews := []*crawler_grpc.Review{review, sameReview, otherReview}
+
 		res, err := client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
 			Site:        blindSite,
 			CompanyName: companyName,
-			Reviews:     []*crawler_grpc.Review{sameReview},
+			Reviews:     []*crawler_grpc.Review{review},
 		})
 		require.NoError(t, err)
 		require.EqualValues(t, 1, res.InsertedCount)
@@ -497,7 +507,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		res, err = client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
 			Site:        blindSite,
 			CompanyName: companyName,
-			Reviews:     []*crawler_grpc.Review{sameReview, otherReview},
+			Reviews:     reviews,
 		})
 		require.NoError(t, err)
 		require.EqualValues(t, 1, res.InsertedCount)
@@ -505,7 +515,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		res, err = client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
 			Site:        blindSite,
 			CompanyName: companyName,
-			Reviews:     []*crawler_grpc.Review{sameReview, otherReview},
+			Reviews:     reviews,
 		})
 		require.NoError(t, err)
 		require.EqualValues(t, 0, res.InsertedCount)
