@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ReviewReaderGrpcClient interface {
 	GetCompanyScores(ctx context.Context, in *GetCompanyScoresRequest, opts ...grpc.CallOption) (*GetCompanyScoresResponse, error)
+	GetCompanyReviews(ctx context.Context, in *GetCompanyReviewsRequest, opts ...grpc.CallOption) (*GetCompanyReviewsResponse, error)
 }
 
 type reviewReaderGrpcClient struct {
@@ -42,11 +43,21 @@ func (c *reviewReaderGrpcClient) GetCompanyScores(ctx context.Context, in *GetCo
 	return out, nil
 }
 
+func (c *reviewReaderGrpcClient) GetCompanyReviews(ctx context.Context, in *GetCompanyReviewsRequest, opts ...grpc.CallOption) (*GetCompanyReviewsResponse, error) {
+	out := new(GetCompanyReviewsResponse)
+	err := c.cc.Invoke(ctx, "/careerhub.review_service.restapi_grpc.ReviewReaderGrpc/GetCompanyReviews", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ReviewReaderGrpcServer is the server API for ReviewReaderGrpc service.
 // All implementations must embed UnimplementedReviewReaderGrpcServer
 // for forward compatibility
 type ReviewReaderGrpcServer interface {
 	GetCompanyScores(context.Context, *GetCompanyScoresRequest) (*GetCompanyScoresResponse, error)
+	GetCompanyReviews(context.Context, *GetCompanyReviewsRequest) (*GetCompanyReviewsResponse, error)
 	mustEmbedUnimplementedReviewReaderGrpcServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedReviewReaderGrpcServer struct {
 
 func (UnimplementedReviewReaderGrpcServer) GetCompanyScores(context.Context, *GetCompanyScoresRequest) (*GetCompanyScoresResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCompanyScores not implemented")
+}
+func (UnimplementedReviewReaderGrpcServer) GetCompanyReviews(context.Context, *GetCompanyReviewsRequest) (*GetCompanyReviewsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCompanyReviews not implemented")
 }
 func (UnimplementedReviewReaderGrpcServer) mustEmbedUnimplementedReviewReaderGrpcServer() {}
 
@@ -88,6 +102,24 @@ func _ReviewReaderGrpc_GetCompanyScores_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ReviewReaderGrpc_GetCompanyReviews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCompanyReviewsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReviewReaderGrpcServer).GetCompanyReviews(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/careerhub.review_service.restapi_grpc.ReviewReaderGrpc/GetCompanyReviews",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReviewReaderGrpcServer).GetCompanyReviews(ctx, req.(*GetCompanyReviewsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ReviewReaderGrpc_ServiceDesc is the grpc.ServiceDesc for ReviewReaderGrpc service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var ReviewReaderGrpc_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCompanyScores",
 			Handler:    _ReviewReaderGrpc_GetCompanyScores_Handler,
+		},
+		{
+			MethodName: "GetCompanyReviews",
+			Handler:    _ReviewReaderGrpc_GetCompanyReviews_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -10,12 +10,14 @@ import (
 
 type ReviewReaderGrpcServer struct {
 	companyRepo *repo.CompanyRepo
+	reviewRepo  *repo.ReviewRepo
 	restapi_grpc.UnimplementedReviewReaderGrpcServer
 }
 
-func NewReviewReaderGrpcServer(companyRepo *repo.CompanyRepo) *ReviewReaderGrpcServer {
+func NewReviewReaderGrpcServer(companyRepo *repo.CompanyRepo, reviewRepo *repo.ReviewRepo) *ReviewReaderGrpcServer {
 	return &ReviewReaderGrpcServer{
 		companyRepo: companyRepo,
+		reviewRepo:  reviewRepo,
 	}
 }
 
@@ -44,5 +46,28 @@ func (s *ReviewReaderGrpcServer) GetCompanyScores(ctx context.Context, in *resta
 
 	return &restapi_grpc.GetCompanyScoresResponse{
 		CompanyScores: companyScores,
+	}, nil
+}
+
+func (s *ReviewReaderGrpcServer) GetCompanyReviews(ctx context.Context, in *restapi_grpc.GetCompanyReviewsRequest) (*restapi_grpc.GetCompanyReviewsResponse, error) {
+	reviews, err := s.reviewRepo.GetReviews(ctx, in.Site, in.CompanyName)
+	if err != nil {
+		return nil, err
+	}
+
+	grpcReviews := make([]*restapi_grpc.Review, 0, len(reviews))
+	for _, r := range reviews {
+		grpcReviews = append(grpcReviews, &restapi_grpc.Review{
+			Score:            r.Score,
+			Summary:          r.Summary,
+			EmploymentStatus: r.EmploymentStatus,
+			ReviewUserId:     r.ReviewUserId,
+			JobType:          r.JobType,
+			UnixMilli:        r.Date.UnixMilli(),
+		})
+	}
+
+	return &restapi_grpc.GetCompanyReviewsResponse{
+		Reviews: grpcReviews,
 	}, nil
 }

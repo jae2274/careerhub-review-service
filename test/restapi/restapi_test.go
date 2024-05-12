@@ -2,12 +2,15 @@ package restapi
 
 import (
 	"context"
+	"slices"
 	"testing"
+	"time"
 
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler/crawler_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/provider_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/restapi/restapi_grpc"
 	"github.com/jae2274/careerhub-review-service/test/tinit"
+	"github.com/jae2274/careerhub-review-service/test/tutils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -223,5 +226,155 @@ func TestReviewReaderGrpc(t *testing.T) {
 			require.True(t, ok)
 			require.Equal(t, companyScore.AvgScore, resultScore)
 		}
+	})
+
+	t.Run("return empty reviews when nothing saved", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+
+		res, err := restapiClient.GetCompanyReviews(ctx, &restapi_grpc.GetCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: "testCompany",
+		})
+		require.NoError(t, err)
+		require.Empty(t, res.Reviews)
+	})
+
+	t.Run("return empty reviews when not yet saved same company", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+
+		_, err := crawlerClient.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: "otherCompany",
+			Reviews:     []*crawler_grpc.Review{tutils.NewCompanyReviewReq("", 45, true)},
+		})
+		require.NoError(t, err)
+
+		res, err := restapiClient.GetCompanyReviews(ctx, &restapi_grpc.GetCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: "testCompany",
+		})
+		require.NoError(t, err)
+		require.Empty(t, res.Reviews)
+	})
+
+	t.Run("return reviews when saved", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+
+		companyName := "testCompany"
+		reviews := []*crawler_grpc.Review{
+			tutils.NewCompanyReviewReq("", 45, true),
+		}
+		_, err := crawlerClient.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: companyName,
+			Reviews:     reviews,
+		})
+		require.NoError(t, err)
+
+		res, err := restapiClient.GetCompanyReviews(ctx, &restapi_grpc.GetCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+		tutils.AssertEqualReviews(t, reviews, res.Reviews)
+	})
+
+	t.Run("return multiple reviews after saved", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+
+		companyName := "testCompany"
+		reviews := []*crawler_grpc.Review{
+			tutils.NewCompanyReviewReq("1", 45, true),
+			tutils.NewCompanyReviewReq("2", 20, false),
+			tutils.NewCompanyReviewReq("3", 35, true),
+		}
+		_, err := crawlerClient.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: companyName,
+			Reviews:     reviews,
+		})
+		require.NoError(t, err)
+
+		res, err := restapiClient.GetCompanyReviews(ctx, &restapi_grpc.GetCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		slices.Reverse(reviews)
+		tutils.AssertEqualReviews(t, reviews, res.Reviews)
+	})
+
+	t.Run("returm multiple reviews after saved several times", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+
+		companyName := "testCompany"
+		reviews1 := []*crawler_grpc.Review{
+			tutils.NewCompanyReviewReq("1", 45, true),
+			tutils.NewCompanyReviewReq("2", 20, false),
+			tutils.NewCompanyReviewReq("3", 35, true),
+		}
+		reviews2 := []*crawler_grpc.Review{
+			tutils.NewCompanyReviewReq("4", 50, true),
+			tutils.NewCompanyReviewReq("5", 25, false),
+			tutils.NewCompanyReviewReq("6", 30, true),
+		}
+
+		reviewsList := [][]*crawler_grpc.Review{reviews1, reviews2}
+
+		for _, reviews := range reviewsList {
+			_, err := crawlerClient.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+				Site:        "testSite",
+				CompanyName: companyName,
+				Reviews:     reviews,
+			})
+			require.NoError(t, err)
+		}
+
+		res, err := restapiClient.GetCompanyReviews(ctx, &restapi_grpc.GetCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		reviews := append(reviews1, reviews2...)
+		slices.Reverse(reviews)
+		tutils.AssertEqualReviews(t, reviews, res.Reviews)
+	})
+
+	t.Run("return reviews sorted by date", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+
+		companyName := "testCompany"
+		reviews := []*crawler_grpc.Review{
+			tutils.NewCompanyReviewReq("1", 45, true),
+			tutils.NewCompanyReviewReq("2", 20, false),
+			tutils.NewCompanyReviewReq("3", 35, true),
+		}
+		now := time.Now()
+		reviews[1].UnixMilli = now.Add(2 * time.Second).UnixMilli()
+		reviews[2].UnixMilli = now.Add(time.Second).UnixMilli()
+		reviews[0].UnixMilli = now.UnixMilli()
+		_, err := crawlerClient.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: companyName,
+			Reviews:     reviews,
+		})
+		require.NoError(t, err)
+
+		res, err := restapiClient.GetCompanyReviews(ctx, &restapi_grpc.GetCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: companyName,
+		})
+
+		require.NoError(t, err)
+		expected := []*crawler_grpc.Review{reviews[1], reviews[2], reviews[0]}
+		tutils.AssertEqualReviews(t, expected, res.Reviews)
 	})
 }
