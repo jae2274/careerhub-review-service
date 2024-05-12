@@ -18,13 +18,17 @@ func NewReviewRepo(db *mongo.Database) *ReviewRepo {
 	}
 }
 
-func (r *ReviewRepo) InsertReviews(ctx context.Context, rv []*review.Review) error {
+func (r *ReviewRepo) InsertReviews(ctx context.Context, rv []*review.Review) (int, error) {
 	docs := make([]interface{}, 0, len(rv))
 	for _, v := range rv {
 		docs = append(docs, v)
 	}
 
-	_, err := r.col.InsertMany(ctx, docs, options.InsertMany().SetOrdered(false)) //멱등성을 위해 ordered를 false로 설정
+	result, err := r.col.InsertMany(ctx, docs, options.InsertMany().SetOrdered(false)) //멱등성을 위해 ordered를 false로 설정
 
-	return err
+	if err != nil && !mongo.IsDuplicateKeyError(err) {
+		return len(result.InsertedIDs), err
+	}
+
+	return len(result.InsertedIDs), nil
 }

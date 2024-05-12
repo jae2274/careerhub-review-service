@@ -27,7 +27,7 @@ type ReviewGrpcClient interface {
 	SetReviewScore(ctx context.Context, in *SetReviewScoreRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	SetNotExist(ctx context.Context, in *SetNotExistRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetCrawlingPages(ctx context.Context, in *GetCrawlingPagesRequest, opts ...grpc.CallOption) (*GetCrawlingPagesResponse, error)
-	SaveCompanyReviews(ctx context.Context, in *SaveCompanyReviewsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SaveCompanyReviews(ctx context.Context, in *SaveCompanyReviewsRequest, opts ...grpc.CallOption) (*SaveCompanyReviewsResponse, error)
 }
 
 type reviewGrpcClient struct {
@@ -74,8 +74,8 @@ func (c *reviewGrpcClient) GetCrawlingPages(ctx context.Context, in *GetCrawling
 	return out, nil
 }
 
-func (c *reviewGrpcClient) SaveCompanyReviews(ctx context.Context, in *SaveCompanyReviewsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *reviewGrpcClient) SaveCompanyReviews(ctx context.Context, in *SaveCompanyReviewsRequest, opts ...grpc.CallOption) (*SaveCompanyReviewsResponse, error) {
+	out := new(SaveCompanyReviewsResponse)
 	err := c.cc.Invoke(ctx, "/careerhub.review_service.crawler_grpc.ReviewGrpc/saveCompanyReviews", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ type ReviewGrpcServer interface {
 	SetReviewScore(context.Context, *SetReviewScoreRequest) (*emptypb.Empty, error)
 	SetNotExist(context.Context, *SetNotExistRequest) (*emptypb.Empty, error)
 	GetCrawlingPages(context.Context, *GetCrawlingPagesRequest) (*GetCrawlingPagesResponse, error)
-	SaveCompanyReviews(context.Context, *SaveCompanyReviewsRequest) (*emptypb.Empty, error)
+	SaveCompanyReviews(context.Context, *SaveCompanyReviewsRequest) (*SaveCompanyReviewsResponse, error)
 	mustEmbedUnimplementedReviewGrpcServer()
 }
 
@@ -111,7 +111,7 @@ func (UnimplementedReviewGrpcServer) SetNotExist(context.Context, *SetNotExistRe
 func (UnimplementedReviewGrpcServer) GetCrawlingPages(context.Context, *GetCrawlingPagesRequest) (*GetCrawlingPagesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCrawlingPages not implemented")
 }
-func (UnimplementedReviewGrpcServer) SaveCompanyReviews(context.Context, *SaveCompanyReviewsRequest) (*emptypb.Empty, error) {
+func (UnimplementedReviewGrpcServer) SaveCompanyReviews(context.Context, *SaveCompanyReviewsRequest) (*SaveCompanyReviewsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveCompanyReviews not implemented")
 }
 func (UnimplementedReviewGrpcServer) mustEmbedUnimplementedReviewGrpcServer() {}

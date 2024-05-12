@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/company"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/review"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/mongocfg"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/vars"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,16 +21,18 @@ func InitDB(t *testing.T) *mongo.Database {
 	db, err := mongocfg.NewDatabase(envVars.MongoUri, envVars.DbName, envVars.DBUser)
 	checkError(t, err)
 
-	initCollection(t, db, &company.Company{})
+	initCollection(t, db, &company.Company{}, &review.Review{})
 
 	return db
 }
 
-func initCollection(t *testing.T, db *mongo.Database, model mongocfg.MongoDBModel) {
-	col := db.Collection(model.Collection())
-	err := col.Drop(context.TODO())
-	checkError(t, err)
-	createIndexes(t, col, model.IndexModels())
+func initCollection(t *testing.T, db *mongo.Database, models ...mongocfg.MongoDBModel) {
+	for _, model := range models {
+		col := db.Collection(model.Collection())
+		err := col.Drop(context.TODO())
+		checkError(t, err)
+		createIndexes(t, col, model.IndexModels())
+	}
 }
 
 func createIndexes(t *testing.T, col *mongo.Collection, indexModels map[string]*mongo.IndexModel) {

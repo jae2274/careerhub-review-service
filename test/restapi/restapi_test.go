@@ -68,12 +68,12 @@ func TestReviewReaderGrpc(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		companyScore := &crawler_grpc.SetScoreNPageRequest{
+		companyScore := &crawler_grpc.SetReviewScoreRequest{
 			Site:        site,
 			CompanyName: companyName,
 			AvgScore:    45,
 		}
-		_, err = crawlerClient.SetScoreNPage(ctx, companyScore)
+		_, err = crawlerClient.SetReviewScore(ctx, companyScore)
 		require.NoError(t, err)
 
 		res, err := restapiClient.GetCompanyScores(ctx, &restapi_grpc.GetCompanyScoresRequest{
@@ -98,12 +98,12 @@ func TestReviewReaderGrpc(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		companyScore := &crawler_grpc.SetScoreNPageRequest{
+		companyScore := &crawler_grpc.SetReviewScoreRequest{
 			Site:        site,
 			CompanyName: companyName, //TODO: 테스트코드 리팩토링 필요
 			AvgScore:    45,
 		}
-		_, err = crawlerClient.SetScoreNPage(ctx, companyScore)
+		_, err = crawlerClient.SetReviewScore(ctx, companyScore)
 		require.NoError(t, err)
 
 		synosymName := "testCompany(주식회사 테스트컴퍼니)"
@@ -157,7 +157,7 @@ func TestReviewReaderGrpc(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		_, err = crawlerClient.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
+		_, err = crawlerClient.SetReviewScore(ctx, &crawler_grpc.SetReviewScoreRequest{
 			Site:        site,
 			CompanyName: companyName,
 			AvgScore:    45,
@@ -180,7 +180,7 @@ func TestReviewReaderGrpc(t *testing.T) {
 
 		site := "testSite"
 
-		companyScores := []*crawler_grpc.SetScoreNPageRequest{
+		companyScores := []*crawler_grpc.SetReviewScoreRequest{
 			{
 				Site:        site,
 				CompanyName: "testCompany1",
@@ -203,7 +203,7 @@ func TestReviewReaderGrpc(t *testing.T) {
 			})
 			require.NoError(t, err)
 
-			_, err = crawlerClient.SetScoreNPage(ctx, companyScore)
+			_, err = crawlerClient.SetReviewScore(ctx, companyScore)
 			require.NoError(t, err)
 		}
 

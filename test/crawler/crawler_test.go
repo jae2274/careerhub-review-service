@@ -3,6 +3,7 @@ package crawler
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler/crawler_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/provider_grpc"
@@ -142,7 +143,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.Equal(t, companyNames, res.CompanyNames)
 	})
 
-	t.Run("can't update score and pageCount if not saved", func(t *testing.T) {
+	t.Run("can't update review score if not saved", func(t *testing.T) {
 		ctx := context.Background()
 		tinit.InitDB(t)
 		client := tinit.InitReviewGrpcClient(t)
@@ -156,7 +157,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("can't update score and pageCount several times", func(t *testing.T) {
+	t.Run("can't update review score several times", func(t *testing.T) {
 		ctx := context.Background()
 		tinit.InitDB(t)
 		client := tinit.InitReviewGrpcClient(t)
@@ -223,7 +224,7 @@ func TestReviewGrpcClient(t *testing.T) {
 	})
 
 	t.Run("can't update different status", func(t *testing.T) {
-		t.Run("update not_exist after score and pageCount", func(t *testing.T) {
+		t.Run("update not_exist after review score", func(t *testing.T) {
 			ctx := context.Background()
 			tinit.InitDB(t)
 			client := tinit.InitReviewGrpcClient(t)
@@ -250,7 +251,7 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.Error(t, err)
 		})
 
-		t.Run("update score and pageCount after not_exist", func(t *testing.T) {
+		t.Run("update review score after not_exist", func(t *testing.T) {
 			ctx := context.Background()
 			tinit.InitDB(t)
 			client := tinit.InitReviewGrpcClient(t)
@@ -407,69 +408,106 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.Empty(t, res.CompanyNames)
 	})
 
-	// t.Run("can't save review until nothing saved", func(t *testing.T) {
-	// 	ctx := context.Background()
-	// 	tinit.InitDB(t)
-	// 	client := tinit.InitReviewGrpcClient(t)
+	t.Run("save company reviews", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
 
-	// 	_, err := client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
-	// 		Site:        blindSite,
-	// 		CompanyName: "testCompany",
-	// 		Page:        1,
-	// 		Reviews:     []*crawler_grpc.Review{},
-	// 	})
-	// 	require.Error(t, err)
-	// })
+		res, err := client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        blindSite,
+			CompanyName: "testCompany",
+			Reviews: []*crawler_grpc.Review{
+				{
+					Score:            45,
+					Summary:          "testSummary",
+					EmploymentStatus: true,
+					ReviewUserId:     "testUserId",
+					JobType:          "testJobType",
+					UnixMilli:        time.Now().UnixMilli(),
+				},
+			},
+		})
+		require.NoError(t, err)
+		require.EqualValues(t, 1, res.InsertedCount)
+	})
 
-	// t.Run("can't save review until score N page saved", func(t *testing.T) {
-	// 	ctx := context.Background()
-	// 	tinit.InitDB(t)
-	// 	client := tinit.InitReviewGrpcClient(t)
-	// 	providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+	t.Run("save multiple company reviews", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
 
-	// 	companyName := "testCompany"
-	// 	_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
-	// 		CompanyName: companyName,
-	// 	})
-	// 	require.NoError(t, err)
+		res, err := client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        blindSite,
+			CompanyName: "testCompany",
+			Reviews: []*crawler_grpc.Review{
+				{
+					Score:            45,
+					Summary:          "testSummary",
+					EmploymentStatus: true,
+					ReviewUserId:     "testUserId",
+					JobType:          "testJobType",
+					UnixMilli:        time.Now().UnixMilli(),
+				},
+				{
+					Score:            45,
+					Summary:          "otherSummary",
+					EmploymentStatus: true,
+					ReviewUserId:     "otherUserId",
+					JobType:          "otherJobType",
+					UnixMilli:        time.Now().UnixMilli(),
+				},
+			},
+		})
+		require.NoError(t, err)
+		require.EqualValues(t, 2, res.InsertedCount)
+	})
 
-	// 	_, err = client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
-	// 		Site:        blindSite,
-	// 		CompanyName: companyName,
-	// 		Page:        1,
-	// 		Reviews:     []*crawler_grpc.Review{},
-	// 	})
-	// 	require.Error(t, err)
-	// })
+	t.Run("ignore same company reviews", func(t *testing.T) { //멱등성
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
 
-	// t.Run("save review after score N page saved", func(t *testing.T) {
-	// 	ctx := context.Background()
-	// 	tinit.InitDB(t)
-	// 	client := tinit.InitReviewGrpcClient(t)
-	// 	providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+		companyName := "testCompany"
+		sameReview := &crawler_grpc.Review{
+			Score:            45,
+			Summary:          "testSummary",
+			EmploymentStatus: true,
+			ReviewUserId:     "testUserId",
+			JobType:          "testJobType",
+			UnixMilli:        time.Now().UnixMilli(),
+		}
 
-	// 	companyName := "testCompany"
-	// 	_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
-	// 		CompanyName: companyName,
-	// 	})
-	// 	require.NoError(t, err)
+		otherReview := &crawler_grpc.Review{
+			Score:            45,
+			Summary:          "otherSummary",
+			EmploymentStatus: true,
+			ReviewUserId:     "otherUserId",
+			JobType:          "otherJobType",
+			UnixMilli:        time.Now().UnixMilli(),
+		}
 
-	// 	companyInfo := &crawler_grpc.SetReviewScoreRequest{
-	// 		Site:           blindSite,
-	// 		CompanyName:    companyName,
-	// 		AvgScore:       45,
-	// 		TotalPageCount: 10,
-	// 		PageSize:       15,
-	// 	}
-	// 	_, err = client.SetReviewScore(ctx, companyInfo)
-	// 	require.NoError(t, err)
+		res, err := client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        blindSite,
+			CompanyName: companyName,
+			Reviews:     []*crawler_grpc.Review{sameReview},
+		})
+		require.NoError(t, err)
+		require.EqualValues(t, 1, res.InsertedCount)
 
-	// 	_, err = client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
-	// 		Site:        blindSite,
-	// 		CompanyName: companyName,
-	// 		Page:        10,
-	// 		Reviews:     []*crawler_grpc.Review{},
-	// 	})
-	// 	require.NoError(t, err)
-	// })
+		res, err = client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        blindSite,
+			CompanyName: companyName,
+			Reviews:     []*crawler_grpc.Review{sameReview, otherReview},
+		})
+		require.NoError(t, err)
+		require.EqualValues(t, 1, res.InsertedCount)
+
+		res, err = client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        blindSite,
+			CompanyName: companyName,
+			Reviews:     []*crawler_grpc.Review{sameReview, otherReview},
+		})
+		require.NoError(t, err)
+		require.EqualValues(t, 0, res.InsertedCount)
+	})
 }

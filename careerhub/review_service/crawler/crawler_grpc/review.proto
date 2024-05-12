@@ -11,7 +11,7 @@ service ReviewGrpc{
     rpc setNotExist(SetNotExistRequest) returns (google.protobuf.Empty);
 
     rpc getCrawlingPages(GetCrawlingPagesRequest) returns (GetCrawlingPagesResponse);
-    rpc saveCompanyReviews(SaveCompanyReviewsRequest) returns (google.protobuf.Empty);
+    rpc saveCompanyReviews(SaveCompanyReviewsRequest) returns (SaveCompanyReviewsResponse);
 }
 
 message GetCrawlingTasksRequest{
@@ -57,4 +57,8 @@ message Review {
     string reviewUserId = 4;
     string jobType = 5;
     int64 unixMilli = 6;
+}
+
+message SaveCompanyReviewsResponse{
+    int32 insertedCount = 1;
 }
