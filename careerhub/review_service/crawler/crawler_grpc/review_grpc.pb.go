@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ReviewGrpcClient interface {
 	GetCrawlingTasks(ctx context.Context, in *GetCrawlingTasksRequest, opts ...grpc.CallOption) (*GetCrawlingTasksResponse, error)
-	SetScoreNPage(ctx context.Context, in *SetScoreNPageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	SetReviewScore(ctx context.Context, in *SetReviewScoreRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	SetNotExist(ctx context.Context, in *SetNotExistRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetCrawlingPages(ctx context.Context, in *GetCrawlingPagesRequest, opts ...grpc.CallOption) (*GetCrawlingPagesResponse, error)
 	SaveCompanyReviews(ctx context.Context, in *SaveCompanyReviewsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -47,9 +47,9 @@ func (c *reviewGrpcClient) GetCrawlingTasks(ctx context.Context, in *GetCrawling
 	return out, nil
 }
 
-func (c *reviewGrpcClient) SetScoreNPage(ctx context.Context, in *SetScoreNPageRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *reviewGrpcClient) SetReviewScore(ctx context.Context, in *SetReviewScoreRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, "/careerhub.review_service.crawler_grpc.ReviewGrpc/setScoreNPage", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/careerhub.review_service.crawler_grpc.ReviewGrpc/setReviewScore", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (c *reviewGrpcClient) SaveCompanyReviews(ctx context.Context, in *SaveCompa
 // for forward compatibility
 type ReviewGrpcServer interface {
 	GetCrawlingTasks(context.Context, *GetCrawlingTasksRequest) (*GetCrawlingTasksResponse, error)
-	SetScoreNPage(context.Context, *SetScoreNPageRequest) (*emptypb.Empty, error)
+	SetReviewScore(context.Context, *SetReviewScoreRequest) (*emptypb.Empty, error)
 	SetNotExist(context.Context, *SetNotExistRequest) (*emptypb.Empty, error)
 	GetCrawlingPages(context.Context, *GetCrawlingPagesRequest) (*GetCrawlingPagesResponse, error)
 	SaveCompanyReviews(context.Context, *SaveCompanyReviewsRequest) (*emptypb.Empty, error)
@@ -102,8 +102,8 @@ type UnimplementedReviewGrpcServer struct {
 func (UnimplementedReviewGrpcServer) GetCrawlingTasks(context.Context, *GetCrawlingTasksRequest) (*GetCrawlingTasksResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCrawlingTasks not implemented")
 }
-func (UnimplementedReviewGrpcServer) SetScoreNPage(context.Context, *SetScoreNPageRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetScoreNPage not implemented")
+func (UnimplementedReviewGrpcServer) SetReviewScore(context.Context, *SetReviewScoreRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetReviewScore not implemented")
 }
 func (UnimplementedReviewGrpcServer) SetNotExist(context.Context, *SetNotExistRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetNotExist not implemented")
@@ -145,20 +145,20 @@ func _ReviewGrpc_GetCrawlingTasks_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReviewGrpc_SetScoreNPage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetScoreNPageRequest)
+func _ReviewGrpc_SetReviewScore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetReviewScoreRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReviewGrpcServer).SetScoreNPage(ctx, in)
+		return srv.(ReviewGrpcServer).SetReviewScore(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/careerhub.review_service.crawler_grpc.ReviewGrpc/setScoreNPage",
+		FullMethod: "/careerhub.review_service.crawler_grpc.ReviewGrpc/setReviewScore",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReviewGrpcServer).SetScoreNPage(ctx, req.(*SetScoreNPageRequest))
+		return srv.(ReviewGrpcServer).SetReviewScore(ctx, req.(*SetReviewScoreRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -229,8 +229,8 @@ var ReviewGrpc_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ReviewGrpc_GetCrawlingTasks_Handler,
 		},
 		{
-			MethodName: "setScoreNPage",
-			Handler:    _ReviewGrpc_SetScoreNPage_Handler,
+			MethodName: "setReviewScore",
+			Handler:    _ReviewGrpc_SetReviewScore_Handler,
 		},
 		{
 			MethodName: "setNotExist",

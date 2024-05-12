@@ -33,7 +33,7 @@ func (r *CompanyRepo) GetCrawlingTasks(ctx context.Context, site string) ([]*com
 	return companies, nil
 }
 
-func (r *CompanyRepo) SetScoreNPage(ctx context.Context, defaultName string, reviewSite *company.ReviewSite) error {
+func (r *CompanyRepo) SetReviewScore(ctx context.Context, defaultName string, reviewSite *company.ReviewSite) error {
 	filter := company.FilterNotIncludeSite(reviewSite.Site)
 	filter[company.DefaultNameField] = defaultName
 

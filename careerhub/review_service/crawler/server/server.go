@@ -40,8 +40,8 @@ func (s *ReviewGrpcServer) GetCrawlingTasks(ctx context.Context, in *crawler_grp
 	}, nil
 }
 
-func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.SetScoreNPageRequest) (*emptypb.Empty, error) {
-	err := s.companyRepo.SetScoreNPage(context.Background(), company.RefineNameForSearch(in.CompanyName), &company.ReviewSite{
+func (s *ReviewGrpcServer) SetReviewScore(ctx context.Context, in *crawler_grpc.SetReviewScoreRequest) (*emptypb.Empty, error) {
+	err := s.companyRepo.SetReviewScore(context.Background(), company.RefineNameForSearch(in.CompanyName), &company.ReviewSite{
 		Site:        in.Site,
 		AvgScore:    in.AvgScore,
 		ReviewCount: in.ReviewCount,
