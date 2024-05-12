@@ -19,13 +19,13 @@ func NewReviewRepo(db *mongo.Database) *ReviewRepo {
 	}
 }
 
-func (r *ReviewRepo) GetReviews(ctx context.Context, site string, companyName string) ([]*review.Review, error) {
+func (r *ReviewRepo) GetReviews(ctx context.Context, site string, companyName string, offset int64, limit int64) ([]*review.Review, error) {
 	filter := bson.M{
 		review.SiteField:        site,
 		review.CompanyNameField: companyName,
 	}
 
-	opt := options.Find().SetSort(bson.M{review.DateField: -1})
+	opt := options.Find().SetSort(bson.M{review.DateField: -1}).SetSkip(offset).SetLimit(limit)
 	cursor, err := r.col.Find(ctx, filter, opt)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {

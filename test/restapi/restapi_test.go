@@ -377,4 +377,36 @@ func TestReviewReaderGrpc(t *testing.T) {
 		expected := []*crawler_grpc.Review{reviews[1], reviews[2], reviews[0]}
 		tutils.AssertEqualReviews(t, expected, res.Reviews)
 	})
+
+	t.Run("return reviews from offset to limit", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+
+		companyName := "testCompany"
+		reviews := []*crawler_grpc.Review{
+			tutils.NewCompanyReviewReq("1", 45, true),
+			tutils.NewCompanyReviewReq("2", 20, false),
+			tutils.NewCompanyReviewReq("3", 35, true),
+			tutils.NewCompanyReviewReq("4", 50, true),
+			tutils.NewCompanyReviewReq("5", 25, false),
+			tutils.NewCompanyReviewReq("6", 30, true),
+		}
+		_, err := crawlerClient.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: companyName,
+			Reviews:     reviews,
+		})
+		require.NoError(t, err)
+
+		res, err := restapiClient.GetCompanyReviews(ctx, &restapi_grpc.GetCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: companyName,
+			Offset:      1,
+			Limit:       3,
+		})
+
+		require.NoError(t, err)
+		expected := []*crawler_grpc.Review{reviews[4], reviews[3], reviews[2]}
+		tutils.AssertEqualReviews(t, expected, res.Reviews)
+	})
 }

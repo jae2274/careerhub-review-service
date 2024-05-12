@@ -50,7 +50,11 @@ func (s *ReviewReaderGrpcServer) GetCompanyScores(ctx context.Context, in *resta
 }
 
 func (s *ReviewReaderGrpcServer) GetCompanyReviews(ctx context.Context, in *restapi_grpc.GetCompanyReviewsRequest) (*restapi_grpc.GetCompanyReviewsResponse, error) {
-	reviews, err := s.reviewRepo.GetReviews(ctx, in.Site, in.CompanyName)
+	if in.Limit <= 0 {
+		in.Limit = 100
+	}
+
+	reviews, err := s.reviewRepo.GetReviews(ctx, in.Site, in.CompanyName, in.Offset, in.Limit)
 	if err != nil {
 		return nil, err
 	}
