@@ -17,7 +17,9 @@ const (
 	ReviewSites_CurrentCrawlingPage = "reviewSites.currentCrawlingPage"
 	CurrentCrawlingPageField        = "currentCrawlingPage"
 	SiteField                       = "site"
-	StatusField                     = "status"
+	ExistStatusField                = "existStatus"
+	CrawlingStatusField             = "crawlingStatus"
+	ReviewCountField                = "reviewCount"
 	InsertedAtField                 = "insertedAt"
 	UpdatedAtField                  = "updatedAt"
 )
@@ -31,11 +33,11 @@ type Company struct {
 }
 
 type ReviewSite struct {
-	Site                string `bson:"site"`
-	Status              Status `bson:"status"`
-	AvgScore            int32  `bson:"avgScore"`
-	CurrentCrawlingPage int32  `bson:"currentCrawlingPage"`
-	PageSize            int32  `bson:"pageSize"`
+	Site           string         `bson:"site"`
+	ExistStatus    ExistStatus    `bson:"existStatus"`
+	AvgScore       int32          `bson:"avgScore"`
+	ReviewCount    int32          `bson:"reviewCount"`
+	CrawlingStatus CrawlingStatus `bson:"crawlingStatus"`
 }
 
 func (*Company) Collection() string {

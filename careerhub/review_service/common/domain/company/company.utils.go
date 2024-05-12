@@ -20,5 +20,5 @@ func FilterNotIncludeSite(site string) bson.M {
 }
 
 func FilterIncludeSite(site string) bson.M {
-	return bson.M{ReviewSitesField: bson.M{"$elemMatch": bson.M{SiteField: site, StatusField: Exist}}}
+	return bson.M{ReviewSitesField: bson.M{"$elemMatch": bson.M{SiteField: site, ExistStatusField: Exist}}}
 }

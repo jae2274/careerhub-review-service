@@ -11,6 +11,7 @@ import (
 
 type ReviewGrpcServer struct {
 	companyRepo *repo.CompanyRepo
+	reviewRepo  *repo.ReviewRepo
 	crawler_grpc.UnimplementedReviewGrpcServer
 }
 
@@ -41,11 +42,9 @@ func (s *ReviewGrpcServer) GetCrawlingTasks(ctx context.Context, in *crawler_grp
 
 func (s *ReviewGrpcServer) SetScoreNPage(ctx context.Context, in *crawler_grpc.SetScoreNPageRequest) (*emptypb.Empty, error) {
 	err := s.companyRepo.SetScoreNPage(context.Background(), company.RefineNameForSearch(in.CompanyName), &company.ReviewSite{
-		Site:                in.Site,
-		Status:              company.Exist,
-		AvgScore:            in.AvgScore,
-		CurrentCrawlingPage: in.TotalPageCount,
-		PageSize:            in.PageSize,
+		Site:        in.Site,
+		AvgScore:    in.AvgScore,
+		ReviewCount: in.ReviewCount,
 	})
 	if err != nil {
 		return nil, err
@@ -67,20 +66,38 @@ func (s *ReviewGrpcServer) GetCrawlingPages(ctx context.Context, in *crawler_grp
 		return nil, err
 	}
 
-	crawlingPages := make([]*crawler_grpc.CrawlingPage, 0)
-	for _, company := range companies {
-		for _, reviewSite := range company.ReviewSites {
+	companyNames := make([]string, 0)
+	for _, c := range companies {
+		for _, reviewSite := range c.ReviewSites {
 			if reviewSite.Site == in.Site {
-				crawlingPages = append(crawlingPages, &crawler_grpc.CrawlingPage{
-					CompanyName:         company.DefaultName,
-					CurrentCrawlingPage: reviewSite.CurrentCrawlingPage,
-					PageSize:            reviewSite.PageSize,
-				})
+				companyNames = append(companyNames, c.DefaultName)
 				break
 			}
 		}
 	}
 	return &crawler_grpc.GetCrawlingPagesResponse{
-		CrawlingPages: crawlingPages,
+		CompanyNames: companyNames,
 	}, nil
 }
+
+// func (s *ReviewGrpcServer) SaveCompanyReviews(ctx context.Context, in *crawler_grpc.SaveCompanyReviewsRequest) (*emptypb.Empty, error) {
+// 	reviews := make([]*review.Review, 0, len(in.Reviews))
+// 	for _, r := range in.Reviews {
+// 		reviews = append(reviews, &review.Review{
+// 			Site:             in.Site,
+// 			CompanyName:      in.CompanyName,
+// 			Score:            r.Score,
+// 			Summary:          r.Summary,
+// 			EmploymentStatus: r.EmploymentStatus,
+// 			ReviewUserId:     r.ReviewUserId,
+// 			JobType:          r.JobType,
+// 			Date:             time.UnixMilli(r.UnixMilli),
+// 		})
+// 	}
+
+// 	err := s.reviewRepo.InsertReviews(ctx, reviews)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// }

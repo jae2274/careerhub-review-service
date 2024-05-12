@@ -69,10 +69,9 @@ func TestReviewReaderGrpc(t *testing.T) {
 		require.NoError(t, err)
 
 		companyScore := &crawler_grpc.SetScoreNPageRequest{
-			Site:           site,
-			CompanyName:    companyName,
-			AvgScore:       45,
-			TotalPageCount: 10,
+			Site:        site,
+			CompanyName: companyName,
+			AvgScore:    45,
 		}
 		_, err = crawlerClient.SetScoreNPage(ctx, companyScore)
 		require.NoError(t, err)
@@ -100,10 +99,9 @@ func TestReviewReaderGrpc(t *testing.T) {
 		require.NoError(t, err)
 
 		companyScore := &crawler_grpc.SetScoreNPageRequest{
-			Site:           site,
-			CompanyName:    companyName, //TODO: 테스트코드 리팩토링 필요
-			AvgScore:       45,
-			TotalPageCount: 10,
+			Site:        site,
+			CompanyName: companyName, //TODO: 테스트코드 리팩토링 필요
+			AvgScore:    45,
 		}
 		_, err = crawlerClient.SetScoreNPage(ctx, companyScore)
 		require.NoError(t, err)
@@ -160,10 +158,9 @@ func TestReviewReaderGrpc(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = crawlerClient.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
-			Site:           site,
-			CompanyName:    companyName,
-			AvgScore:       45,
-			TotalPageCount: 10,
+			Site:        site,
+			CompanyName: companyName,
+			AvgScore:    45,
 		})
 		require.NoError(t, err)
 
@@ -185,22 +182,19 @@ func TestReviewReaderGrpc(t *testing.T) {
 
 		companyScores := []*crawler_grpc.SetScoreNPageRequest{
 			{
-				Site:           site,
-				CompanyName:    "testCompany1",
-				AvgScore:       45,
-				TotalPageCount: 14,
+				Site:        site,
+				CompanyName: "testCompany1",
+				AvgScore:    45,
 			},
 			{
-				Site:           site,
-				CompanyName:    "testCompany2",
-				AvgScore:       20,
-				TotalPageCount: 10,
+				Site:        site,
+				CompanyName: "testCompany2",
+				AvgScore:    20,
 			},
 			{
-				Site:           site,
-				CompanyName:    "testCompany3",
-				AvgScore:       35,
-				TotalPageCount: 14,
+				Site:        site,
+				CompanyName: "testCompany3",
+				AvgScore:    35,
 			},
 		}
 		for _, companyScore := range companyScores {

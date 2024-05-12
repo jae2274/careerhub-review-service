@@ -76,11 +76,10 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 
 			_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
-				Site:           blindSite,
-				CompanyName:    companyName,
-				AvgScore:       45,
-				TotalPageCount: 10,
-				PageSize:       15,
+				Site:        blindSite,
+				CompanyName: companyName,
+				AvgScore:    45,
+				ReviewCount: 10,
 			})
 			require.NoError(t, err)
 		}
@@ -149,11 +148,10 @@ func TestReviewGrpcClient(t *testing.T) {
 		client := tinit.InitReviewGrpcClient(t)
 
 		_, err := client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
-			Site:           blindSite,
-			CompanyName:    "testCompany",
-			AvgScore:       45,
-			TotalPageCount: 10,
-			PageSize:       15,
+			Site:        blindSite,
+			CompanyName: "testCompany",
+			AvgScore:    45,
+			ReviewCount: 10,
 		})
 		require.Error(t, err)
 	})
@@ -171,20 +169,18 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
-			Site:           blindSite,
-			CompanyName:    companyName,
-			AvgScore:       45,
-			TotalPageCount: 10,
-			PageSize:       15,
+			Site:        blindSite,
+			CompanyName: companyName,
+			AvgScore:    45,
+			ReviewCount: 10,
 		})
 		require.NoError(t, err)
 
 		_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
-			Site:           blindSite,
-			CompanyName:    companyName,
-			AvgScore:       45,
-			TotalPageCount: 10,
-			PageSize:       15,
+			Site:        blindSite,
+			CompanyName: companyName,
+			AvgScore:    45,
+			ReviewCount: 10,
 		})
 		require.Error(t, err)
 	})
@@ -246,11 +242,10 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 
 			_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
-				Site:           blindSite,
-				CompanyName:    companyName,
-				AvgScore:       45,
-				TotalPageCount: 10,
-				PageSize:       15,
+				Site:        blindSite,
+				CompanyName: companyName,
+				AvgScore:    45,
+				ReviewCount: 10,
 			})
 			require.Error(t, err)
 		})
@@ -268,11 +263,10 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 
 			_, err = client.SetScoreNPage(ctx, &crawler_grpc.SetScoreNPageRequest{
-				Site:           blindSite,
-				CompanyName:    companyName,
-				AvgScore:       45,
-				TotalPageCount: 10,
-				PageSize:       15,
+				Site:        blindSite,
+				CompanyName: companyName,
+				AvgScore:    45,
+				ReviewCount: 10,
 			})
 			require.NoError(t, err)
 
@@ -291,7 +285,7 @@ func TestReviewGrpcClient(t *testing.T) {
 
 		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Empty(t, res.CrawlingPages)
+		require.Empty(t, res.CompanyNames)
 	})
 
 	t.Run("return empty crawling page until update score N page", func(t *testing.T) {
@@ -308,7 +302,7 @@ func TestReviewGrpcClient(t *testing.T) {
 
 		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Empty(t, res.CrawlingPages)
+		require.Empty(t, res.CompanyNames)
 	})
 
 	t.Run("return crawling page after update score N page", func(t *testing.T) {
@@ -324,20 +318,18 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 
 		companyInfo := &crawler_grpc.SetScoreNPageRequest{
-			Site:           blindSite,
-			CompanyName:    companyName,
-			AvgScore:       45,
-			TotalPageCount: 10,
-			PageSize:       15,
+			Site:        blindSite,
+			CompanyName: companyName,
+			AvgScore:    45,
+			ReviewCount: 10,
 		}
 		_, err = client.SetScoreNPage(ctx, companyInfo)
 		require.NoError(t, err)
 
 		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Len(t, res.CrawlingPages, 1)
-		require.Equal(t, companyInfo.TotalPageCount, res.CrawlingPages[0].CurrentCrawlingPage)
-		require.Equal(t, companyInfo.PageSize, res.CrawlingPages[0].PageSize)
+		require.Len(t, res.CompanyNames, 1)
+		require.Equal(t, companyInfo.CompanyName, res.CompanyNames[0])
 	})
 
 	t.Run("return empty crawling page after update not_exist", func(t *testing.T) {
@@ -360,10 +352,10 @@ func TestReviewGrpcClient(t *testing.T) {
 
 		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Empty(t, res.CrawlingPages)
+		require.Empty(t, res.CompanyNames)
 	})
 
-	t.Run("return empty crawling page after update pageCount zero", func(t *testing.T) {
+	t.Run("return empty crawling page after update reviewCount zero", func(t *testing.T) {
 		ctx := context.Background()
 		tinit.InitDB(t)
 		client := tinit.InitReviewGrpcClient(t)
@@ -376,18 +368,17 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 
 		companyInfo := &crawler_grpc.SetScoreNPageRequest{
-			Site:           blindSite,
-			CompanyName:    companyName,
-			AvgScore:       45,
-			TotalPageCount: 0,
-			PageSize:       15,
+			Site:        blindSite,
+			CompanyName: companyName,
+			AvgScore:    0,
+			ReviewCount: 0,
 		}
 		_, err = client.SetScoreNPage(ctx, companyInfo)
 		require.NoError(t, err)
 
 		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Empty(t, res.CrawlingPages)
+		require.Empty(t, res.CompanyNames)
 	})
 
 	t.Run("return empty crawling page regardless other site", func(t *testing.T) {
@@ -403,17 +394,82 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 
 		companyInfo := &crawler_grpc.SetScoreNPageRequest{
-			Site:           blindSite,
-			CompanyName:    companyName,
-			AvgScore:       45,
-			TotalPageCount: 10,
-			PageSize:       15,
+			Site:        blindSite,
+			CompanyName: companyName,
+			AvgScore:    45,
+			ReviewCount: 10,
 		}
 		_, err = client.SetScoreNPage(ctx, companyInfo)
 		require.NoError(t, err)
 
 		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: "otherSite"})
 		require.NoError(t, err)
-		require.Empty(t, res.CrawlingPages)
+		require.Empty(t, res.CompanyNames)
 	})
+
+	// t.Run("can't save review until nothing saved", func(t *testing.T) {
+	// 	ctx := context.Background()
+	// 	tinit.InitDB(t)
+	// 	client := tinit.InitReviewGrpcClient(t)
+
+	// 	_, err := client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+	// 		Site:        blindSite,
+	// 		CompanyName: "testCompany",
+	// 		Page:        1,
+	// 		Reviews:     []*crawler_grpc.Review{},
+	// 	})
+	// 	require.Error(t, err)
+	// })
+
+	// t.Run("can't save review until score N page saved", func(t *testing.T) {
+	// 	ctx := context.Background()
+	// 	tinit.InitDB(t)
+	// 	client := tinit.InitReviewGrpcClient(t)
+	// 	providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+	// 	companyName := "testCompany"
+	// 	_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+	// 		CompanyName: companyName,
+	// 	})
+	// 	require.NoError(t, err)
+
+	// 	_, err = client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+	// 		Site:        blindSite,
+	// 		CompanyName: companyName,
+	// 		Page:        1,
+	// 		Reviews:     []*crawler_grpc.Review{},
+	// 	})
+	// 	require.Error(t, err)
+	// })
+
+	// t.Run("save review after score N page saved", func(t *testing.T) {
+	// 	ctx := context.Background()
+	// 	tinit.InitDB(t)
+	// 	client := tinit.InitReviewGrpcClient(t)
+	// 	providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+	// 	companyName := "testCompany"
+	// 	_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+	// 		CompanyName: companyName,
+	// 	})
+	// 	require.NoError(t, err)
+
+	// 	companyInfo := &crawler_grpc.SetScoreNPageRequest{
+	// 		Site:           blindSite,
+	// 		CompanyName:    companyName,
+	// 		AvgScore:       45,
+	// 		TotalPageCount: 10,
+	// 		PageSize:       15,
+	// 	}
+	// 	_, err = client.SetScoreNPage(ctx, companyInfo)
+	// 	require.NoError(t, err)
+
+	// 	_, err = client.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+	// 		Site:        blindSite,
+	// 		CompanyName: companyName,
+	// 		Page:        10,
+	// 		Reviews:     []*crawler_grpc.Review{},
+	// 	})
+	// 	require.NoError(t, err)
+	// })
 }
