@@ -36,12 +36,17 @@ func (*Review) Collection() string {
 }
 
 func (*Review) IndexModels() map[string]*mongo.IndexModel {
-	indexName := fmt.Sprintf("%s_1_%s_1_%s_1_%s_1", SiteField, CompanyNameField, SummaryField, ReviewUserIdField)
+	uniqueIndexName := fmt.Sprintf("%s_1_%s_1_%s_1_%s_1", SiteField, CompanyNameField, SummaryField, ReviewUserIdField)
 
+	sortIndexName := fmt.Sprintf("%s_1_%s_1_%s_1", SiteField, CompanyNameField, DateField)
 	return map[string]*mongo.IndexModel{
-		indexName: {
+		uniqueIndexName: {
 			Keys:    bson.D{{Key: SiteField, Value: 1}, {Key: CompanyNameField, Value: 1}, {Key: SummaryField, Value: 1}, {Key: ReviewUserIdField, Value: 1}},
 			Options: options.Index().SetUnique(true),
+		},
+		sortIndexName: {
+			Keys:    bson.D{{Key: SiteField, Value: 1}, {Key: CompanyNameField, Value: 1}, {Key: DateField, Value: -1}},
+			Options: options.Index(),
 		},
 	}
 }
