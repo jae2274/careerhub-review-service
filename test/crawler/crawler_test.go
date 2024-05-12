@@ -284,7 +284,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		tinit.InitDB(t)
 		client := tinit.InitReviewGrpcClient(t)
 
-		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
+		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
 		require.Empty(t, res.CompanyNames)
 	})
@@ -301,7 +301,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
+		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
 		require.Empty(t, res.CompanyNames)
 	})
@@ -327,7 +327,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		_, err = client.SetReviewScore(ctx, companyInfo)
 		require.NoError(t, err)
 
-		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
+		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
 		require.Len(t, res.CompanyNames, 1)
 		require.Equal(t, companyInfo.CompanyName, res.CompanyNames[0])
@@ -351,7 +351,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
+		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
 		require.Empty(t, res.CompanyNames)
 	})
@@ -377,7 +377,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		_, err = client.SetReviewScore(ctx, companyInfo)
 		require.NoError(t, err)
 
-		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: blindSite})
+		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
 		require.Empty(t, res.CompanyNames)
 	})
@@ -403,7 +403,7 @@ func TestReviewGrpcClient(t *testing.T) {
 		_, err = client.SetReviewScore(ctx, companyInfo)
 		require.NoError(t, err)
 
-		res, err := client.GetCrawlingPages(ctx, &crawler_grpc.GetCrawlingPagesRequest{Site: "otherSite"})
+		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: "otherSite"})
 		require.NoError(t, err)
 		require.Empty(t, res.CompanyNames)
 	})

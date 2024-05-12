@@ -64,7 +64,7 @@ func (s *ReviewGrpcServer) SetNotExist(ctx context.Context, in *crawler_grpc.Set
 	return &emptypb.Empty{}, nil
 }
 
-func (s *ReviewGrpcServer) GetCrawlingPages(ctx context.Context, in *crawler_grpc.GetCrawlingPagesRequest) (*crawler_grpc.GetCrawlingPagesResponse, error) {
+func (s *ReviewGrpcServer) GetCrawlingTargets(ctx context.Context, in *crawler_grpc.GetCrawlingTargetsRequest) (*crawler_grpc.GetCrawlingTargetsResponse, error) {
 	companies, err := s.companyRepo.GetCrawlingTargets(ctx, in.Site)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (s *ReviewGrpcServer) GetCrawlingPages(ctx context.Context, in *crawler_grp
 			}
 		}
 	}
-	return &crawler_grpc.GetCrawlingPagesResponse{
+	return &crawler_grpc.GetCrawlingTargetsResponse{
 		CompanyNames: companyNames,
 	}, nil
 }

@@ -26,7 +26,7 @@ type ReviewGrpcClient interface {
 	GetCrawlingTasks(ctx context.Context, in *GetCrawlingTasksRequest, opts ...grpc.CallOption) (*GetCrawlingTasksResponse, error)
 	SetReviewScore(ctx context.Context, in *SetReviewScoreRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	SetNotExist(ctx context.Context, in *SetNotExistRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
-	GetCrawlingPages(ctx context.Context, in *GetCrawlingPagesRequest, opts ...grpc.CallOption) (*GetCrawlingPagesResponse, error)
+	GetCrawlingTargets(ctx context.Context, in *GetCrawlingTargetsRequest, opts ...grpc.CallOption) (*GetCrawlingTargetsResponse, error)
 	SaveCompanyReviews(ctx context.Context, in *SaveCompanyReviewsRequest, opts ...grpc.CallOption) (*SaveCompanyReviewsResponse, error)
 }
 
@@ -65,9 +65,9 @@ func (c *reviewGrpcClient) SetNotExist(ctx context.Context, in *SetNotExistReque
 	return out, nil
 }
 
-func (c *reviewGrpcClient) GetCrawlingPages(ctx context.Context, in *GetCrawlingPagesRequest, opts ...grpc.CallOption) (*GetCrawlingPagesResponse, error) {
-	out := new(GetCrawlingPagesResponse)
-	err := c.cc.Invoke(ctx, "/careerhub.review_service.crawler_grpc.ReviewGrpc/getCrawlingPages", in, out, opts...)
+func (c *reviewGrpcClient) GetCrawlingTargets(ctx context.Context, in *GetCrawlingTargetsRequest, opts ...grpc.CallOption) (*GetCrawlingTargetsResponse, error) {
+	out := new(GetCrawlingTargetsResponse)
+	err := c.cc.Invoke(ctx, "/careerhub.review_service.crawler_grpc.ReviewGrpc/getCrawlingTargets", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ type ReviewGrpcServer interface {
 	GetCrawlingTasks(context.Context, *GetCrawlingTasksRequest) (*GetCrawlingTasksResponse, error)
 	SetReviewScore(context.Context, *SetReviewScoreRequest) (*emptypb.Empty, error)
 	SetNotExist(context.Context, *SetNotExistRequest) (*emptypb.Empty, error)
-	GetCrawlingPages(context.Context, *GetCrawlingPagesRequest) (*GetCrawlingPagesResponse, error)
+	GetCrawlingTargets(context.Context, *GetCrawlingTargetsRequest) (*GetCrawlingTargetsResponse, error)
 	SaveCompanyReviews(context.Context, *SaveCompanyReviewsRequest) (*SaveCompanyReviewsResponse, error)
 	mustEmbedUnimplementedReviewGrpcServer()
 }
@@ -108,8 +108,8 @@ func (UnimplementedReviewGrpcServer) SetReviewScore(context.Context, *SetReviewS
 func (UnimplementedReviewGrpcServer) SetNotExist(context.Context, *SetNotExistRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetNotExist not implemented")
 }
-func (UnimplementedReviewGrpcServer) GetCrawlingPages(context.Context, *GetCrawlingPagesRequest) (*GetCrawlingPagesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCrawlingPages not implemented")
+func (UnimplementedReviewGrpcServer) GetCrawlingTargets(context.Context, *GetCrawlingTargetsRequest) (*GetCrawlingTargetsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCrawlingTargets not implemented")
 }
 func (UnimplementedReviewGrpcServer) SaveCompanyReviews(context.Context, *SaveCompanyReviewsRequest) (*SaveCompanyReviewsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveCompanyReviews not implemented")
@@ -181,20 +181,20 @@ func _ReviewGrpc_SetNotExist_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReviewGrpc_GetCrawlingPages_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCrawlingPagesRequest)
+func _ReviewGrpc_GetCrawlingTargets_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCrawlingTargetsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReviewGrpcServer).GetCrawlingPages(ctx, in)
+		return srv.(ReviewGrpcServer).GetCrawlingTargets(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/careerhub.review_service.crawler_grpc.ReviewGrpc/getCrawlingPages",
+		FullMethod: "/careerhub.review_service.crawler_grpc.ReviewGrpc/getCrawlingTargets",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReviewGrpcServer).GetCrawlingPages(ctx, req.(*GetCrawlingPagesRequest))
+		return srv.(ReviewGrpcServer).GetCrawlingTargets(ctx, req.(*GetCrawlingTargetsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -237,8 +237,8 @@ var ReviewGrpc_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ReviewGrpc_SetNotExist_Handler,
 		},
 		{
-			MethodName: "getCrawlingPages",
-			Handler:    _ReviewGrpc_GetCrawlingPages_Handler,
+			MethodName: "getCrawlingTargets",
+			Handler:    _ReviewGrpc_GetCrawlingTargets_Handler,
 		},
 		{
 			MethodName: "saveCompanyReviews",
