@@ -102,3 +102,9 @@ func (s *ReviewGrpcServer) SaveCompanyReviews(ctx context.Context, in *crawler_g
 	insertedCount, err := s.reviewRepo.InsertReviews(ctx, reviews)
 	return &crawler_grpc.SaveCompanyReviewsResponse{InsertedCount: int32(insertedCount)}, err
 }
+
+func (s *ReviewGrpcServer) FinishCrawlingTask(ctx context.Context, in *crawler_grpc.FinishCrawlingTaskRequest) (*emptypb.Empty, error) {
+	err := s.companyRepo.FinishCrawlingTask(ctx, in.CompanyName, in.Site)
+
+	return &emptypb.Empty{}, err
+}

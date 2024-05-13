@@ -520,4 +520,35 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 		require.EqualValues(t, 0, res.InsertedCount)
 	})
+
+	t.Run("returm empty crawling target after finish crawling", func(t *testing.T) {
+		ctx := context.Background()
+		tinit.InitDB(t)
+		client := tinit.InitReviewGrpcClient(t)
+		providerClient := tinit.InitCrawlingTaskGrpcClient(t)
+
+		companyName := "testCompany"
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		_, err = client.SetReviewScore(ctx, &crawler_grpc.SetReviewScoreRequest{
+			Site:        blindSite,
+			CompanyName: companyName,
+			AvgScore:    45,
+			ReviewCount: 10,
+		})
+		require.NoError(t, err)
+
+		_, err = client.FinishCrawlingTask(ctx, &crawler_grpc.FinishCrawlingTaskRequest{
+			Site:        blindSite,
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
+		require.NoError(t, err)
+		require.Empty(t, res.CompanyNames)
+	})
 }

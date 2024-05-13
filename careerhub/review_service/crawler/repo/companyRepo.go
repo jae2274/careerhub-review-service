@@ -94,3 +94,23 @@ func (r *CompanyRepo) GetCrawlingTargets(ctx context.Context, site string) ([]*c
 
 	return companies, nil
 }
+
+func (r *CompanyRepo) FinishCrawlingTask(ctx context.Context, companyName, site string) error {
+	filter := company.FilterIncludeSite(site)
+	filter[company.DefaultNameField] = companyName
+
+	update := bson.M{
+		"$set": bson.M{company.ReviewSitesField + ".$." + company.CrawlingStatusField: company.Crawled},
+	}
+
+	result, err := r.col.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("matched count is 0. company: %s, site: %s", companyName, site)
+	}
+
+	return nil
+}

@@ -10,18 +10,17 @@ import (
 )
 
 const (
-	DefaultNameField                = "defaultName"
-	OtherNamesField                 = "otherNames"
-	ReviewSitesField                = "reviewSites"
-	ReviewSites_Site                = "reviewSites.site"
-	ReviewSites_CurrentCrawlingPage = "reviewSites.currentCrawlingPage"
-	CurrentCrawlingPageField        = "currentCrawlingPage"
-	SiteField                       = "site"
-	ExistStatusField                = "existStatus"
-	CrawlingStatusField             = "crawlingStatus"
-	ReviewCountField                = "reviewCount"
-	InsertedAtField                 = "insertedAt"
-	UpdatedAtField                  = "updatedAt"
+	DefaultNameField               = "defaultName"
+	OtherNamesField                = "otherNames"
+	ReviewSitesField               = "reviewSites"
+	ReviewSites_Site               = "reviewSites.site"
+	SiteField                      = "site"
+	ExistStatusField               = "existStatus"
+	ReviewSite_CrawlingStatusField = "reviewSites.crawlingStatus"
+	CrawlingStatusField            = "crawlingStatus"
+	ReviewCountField               = "reviewCount"
+	InsertedAtField                = "insertedAt"
+	UpdatedAtField                 = "updatedAt"
 )
 
 type Company struct {
