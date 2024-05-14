@@ -46,9 +46,10 @@ func (s *ReviewGrpcServer) GetCrawlingTasks(ctx context.Context, in *crawler_grp
 
 func (s *ReviewGrpcServer) SetReviewScore(ctx context.Context, in *crawler_grpc.SetReviewScoreRequest) (*emptypb.Empty, error) {
 	err := s.companyRepo.SetReviewScore(context.Background(), company.RefineNameForSearch(in.CompanyName), &company.ReviewSite{
-		Site:        in.Site,
-		AvgScore:    in.AvgScore,
-		ReviewCount: in.ReviewCount,
+		Site:           in.Site,
+		AvgScore:       in.AvgScore,
+		ReviewCount:    in.ReviewCount,
+		TotalPageCount: in.TotalPageCount,
 	})
 	if err != nil {
 		return nil, err
@@ -70,17 +71,20 @@ func (s *ReviewGrpcServer) GetCrawlingTargets(ctx context.Context, in *crawler_g
 		return nil, err
 	}
 
-	companyNames := make([]string, 0)
+	targets := make([]*crawler_grpc.CrawlingTarget, 0)
 	for _, c := range companies {
 		for _, reviewSite := range c.ReviewSites {
 			if reviewSite.Site == in.Site {
-				companyNames = append(companyNames, c.DefaultName)
+				targets = append(targets, &crawler_grpc.CrawlingTarget{
+					CompanyName:    c.DefaultName,
+					TotalPageCount: reviewSite.TotalPageCount,
+				})
 				break
 			}
 		}
 	}
 	return &crawler_grpc.GetCrawlingTargetsResponse{
-		CompanyNames: companyNames,
+		Targets: targets,
 	}, nil
 }
 

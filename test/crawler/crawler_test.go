@@ -77,10 +77,11 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 
 			_, err = client.SetReviewScore(ctx, &crawler_grpc.SetReviewScoreRequest{
-				Site:        blindSite,
-				CompanyName: companyName,
-				AvgScore:    45,
-				ReviewCount: 10,
+				Site:           blindSite,
+				CompanyName:    companyName,
+				AvgScore:       45,
+				ReviewCount:    10,
+				TotalPageCount: 10,
 			})
 			require.NoError(t, err)
 		}
@@ -149,10 +150,11 @@ func TestReviewGrpcClient(t *testing.T) {
 		client := tinit.InitReviewGrpcClient(t)
 
 		_, err := client.SetReviewScore(ctx, &crawler_grpc.SetReviewScoreRequest{
-			Site:        blindSite,
-			CompanyName: "testCompany",
-			AvgScore:    45,
-			ReviewCount: 10,
+			Site:           blindSite,
+			CompanyName:    "testCompany",
+			AvgScore:       45,
+			ReviewCount:    10,
+			TotalPageCount: 10,
 		})
 		require.Error(t, err)
 	})
@@ -170,18 +172,20 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = client.SetReviewScore(ctx, &crawler_grpc.SetReviewScoreRequest{
-			Site:        blindSite,
-			CompanyName: companyName,
-			AvgScore:    45,
-			ReviewCount: 10,
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			ReviewCount:    10,
+			TotalPageCount: 10,
 		})
 		require.NoError(t, err)
 
 		_, err = client.SetReviewScore(ctx, &crawler_grpc.SetReviewScoreRequest{
-			Site:        blindSite,
-			CompanyName: companyName,
-			AvgScore:    45,
-			ReviewCount: 10,
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			ReviewCount:    10,
+			TotalPageCount: 10,
 		})
 		require.Error(t, err)
 	})
@@ -243,10 +247,11 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 
 			_, err = client.SetReviewScore(ctx, &crawler_grpc.SetReviewScoreRequest{
-				Site:        blindSite,
-				CompanyName: companyName,
-				AvgScore:    45,
-				ReviewCount: 10,
+				Site:           blindSite,
+				CompanyName:    companyName,
+				AvgScore:       45,
+				ReviewCount:    10,
+				TotalPageCount: 10,
 			})
 			require.Error(t, err)
 		})
@@ -264,10 +269,11 @@ func TestReviewGrpcClient(t *testing.T) {
 			require.NoError(t, err)
 
 			_, err = client.SetReviewScore(ctx, &crawler_grpc.SetReviewScoreRequest{
-				Site:        blindSite,
-				CompanyName: companyName,
-				AvgScore:    45,
-				ReviewCount: 10,
+				Site:           blindSite,
+				CompanyName:    companyName,
+				AvgScore:       45,
+				ReviewCount:    10,
+				TotalPageCount: 10,
 			})
 			require.NoError(t, err)
 
@@ -286,7 +292,7 @@ func TestReviewGrpcClient(t *testing.T) {
 
 		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Empty(t, res.CompanyNames)
+		require.Empty(t, res.Targets)
 	})
 
 	t.Run("return empty crawling page until update score N page", func(t *testing.T) {
@@ -303,7 +309,7 @@ func TestReviewGrpcClient(t *testing.T) {
 
 		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Empty(t, res.CompanyNames)
+		require.Empty(t, res.Targets)
 	})
 
 	t.Run("return crawling page after update score N page", func(t *testing.T) {
@@ -319,18 +325,20 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 
 		companyInfo := &crawler_grpc.SetReviewScoreRequest{
-			Site:        blindSite,
-			CompanyName: companyName,
-			AvgScore:    45,
-			ReviewCount: 10,
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			ReviewCount:    10,
+			TotalPageCount: 10,
 		}
 		_, err = client.SetReviewScore(ctx, companyInfo)
 		require.NoError(t, err)
 
 		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Len(t, res.CompanyNames, 1)
-		require.Equal(t, companyInfo.CompanyName, res.CompanyNames[0])
+		require.Len(t, res.Targets, 1)
+		require.Equal(t, companyInfo.CompanyName, res.Targets[0].CompanyName)
+		require.Equal(t, companyInfo.TotalPageCount, res.Targets[0].TotalPageCount)
 	})
 
 	t.Run("return empty crawling page after update not_exist", func(t *testing.T) {
@@ -353,7 +361,7 @@ func TestReviewGrpcClient(t *testing.T) {
 
 		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Empty(t, res.CompanyNames)
+		require.Empty(t, res.Targets)
 	})
 
 	t.Run("return empty crawling page after update reviewCount zero", func(t *testing.T) {
@@ -369,17 +377,18 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 
 		companyInfo := &crawler_grpc.SetReviewScoreRequest{
-			Site:        blindSite,
-			CompanyName: companyName,
-			AvgScore:    0,
-			ReviewCount: 0,
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       0,
+			ReviewCount:    0,
+			TotalPageCount: 0,
 		}
 		_, err = client.SetReviewScore(ctx, companyInfo)
 		require.NoError(t, err)
 
 		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Empty(t, res.CompanyNames)
+		require.Empty(t, res.Targets)
 	})
 
 	t.Run("return empty crawling page regardless other site", func(t *testing.T) {
@@ -395,17 +404,18 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 
 		companyInfo := &crawler_grpc.SetReviewScoreRequest{
-			Site:        blindSite,
-			CompanyName: companyName,
-			AvgScore:    45,
-			ReviewCount: 10,
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			ReviewCount:    10,
+			TotalPageCount: 10,
 		}
 		_, err = client.SetReviewScore(ctx, companyInfo)
 		require.NoError(t, err)
 
 		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: "otherSite"})
 		require.NoError(t, err)
-		require.Empty(t, res.CompanyNames)
+		require.Empty(t, res.Targets)
 	})
 
 	t.Run("save company reviews", func(t *testing.T) {
@@ -534,10 +544,11 @@ func TestReviewGrpcClient(t *testing.T) {
 		require.NoError(t, err)
 
 		_, err = client.SetReviewScore(ctx, &crawler_grpc.SetReviewScoreRequest{
-			Site:        blindSite,
-			CompanyName: companyName,
-			AvgScore:    45,
-			ReviewCount: 10,
+			Site:           blindSite,
+			CompanyName:    companyName,
+			AvgScore:       45,
+			ReviewCount:    10,
+			TotalPageCount: 10,
 		})
 		require.NoError(t, err)
 
@@ -549,6 +560,6 @@ func TestReviewGrpcClient(t *testing.T) {
 
 		res, err := client.GetCrawlingTargets(ctx, &crawler_grpc.GetCrawlingTargetsRequest{Site: blindSite})
 		require.NoError(t, err)
-		require.Empty(t, res.CompanyNames)
+		require.Empty(t, res.Targets)
 	})
 }

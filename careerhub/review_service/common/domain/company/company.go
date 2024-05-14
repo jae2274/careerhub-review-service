@@ -36,6 +36,7 @@ type ReviewSite struct {
 	ExistStatus    ExistStatus    `bson:"existStatus"`
 	AvgScore       int32          `bson:"avgScore"`
 	ReviewCount    int32          `bson:"reviewCount"`
+	TotalPageCount int32          `bson:"totalPageCount"`
 	CrawlingStatus CrawlingStatus `bson:"crawlingStatus"`
 }
 
