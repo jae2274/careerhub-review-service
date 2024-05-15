@@ -8,7 +8,7 @@ import (
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/provider_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/repo"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/server"
-	"github.com/jae2274/careerhub-review-service/utils"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/utils"
 	"github.com/jae2274/goutils/llog"
 	"github.com/jae2274/goutils/terr"
 	"go.mongodb.org/mongo-driver/mongo"
