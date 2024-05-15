@@ -35,11 +35,15 @@ func (s *ReviewReaderGrpcServer) GetCompanyScores(ctx context.Context, in *resta
 		return nil, err
 	}
 
-	companyScores := make(map[string]int32)
+	companyScores := make(map[string]*restapi_grpc.CompanyScore)
 	for _, c := range companies {
 		for _, score := range c.ReviewSites {
 			if score.Site == in.Site {
-				companyScores[companyNamesMap[c.DefaultName]] = score.AvgScore
+				companyScores[companyNamesMap[c.DefaultName]] = &restapi_grpc.CompanyScore{
+					CompanyName: c.DefaultName,
+					Score:       score.AvgScore,
+					ReviewCount: score.ReviewCount,
+				}
 			}
 		}
 	}

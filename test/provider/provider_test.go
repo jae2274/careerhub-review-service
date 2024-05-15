@@ -49,22 +49,43 @@ func TestCrawlingTaskGrpc(t *testing.T) {
 
 	//이음동의어의 자세한 조건은 별도의 테스트로 분리
 	t.Run("return not_modified when has synonym company", func(t *testing.T) {
-		tinit.InitDB(t)
+		t.Run("case 1", func(t *testing.T) {
+			tinit.InitDB(t)
 
-		ctx := context.Background()
-		client := tinit.InitCrawlingTaskGrpcClient(t)
+			ctx := context.Background()
+			client := tinit.InitCrawlingTaskGrpcClient(t)
 
-		_, err := client.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
-			CompanyName: "testCompany",
+			_, err := client.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+				CompanyName: "testCompany",
+			})
+			require.NoError(t, err)
+
+			// Add synonym company
+			res, err := client.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+				CompanyName: "testCompany(주)",
+			})
+
+			require.NoError(t, err)
+			require.Equal(t, server.CrawlingTaskNotModified, res.Status)
 		})
-		require.NoError(t, err)
+		t.Run("case 2", func(t *testing.T) {
+			tinit.InitDB(t)
 
-		// Add synonym company
-		res, err := client.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
-			CompanyName: "testCompany(주)",
+			ctx := context.Background()
+			client := tinit.InitCrawlingTaskGrpcClient(t)
+
+			_, err := client.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+				CompanyName: "testCompany(주)",
+			})
+			require.NoError(t, err)
+
+			// Add synonym company
+			res, err := client.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+				CompanyName: "testCompany",
+			})
+
+			require.NoError(t, err)
+			require.Equal(t, server.CrawlingTaskNotModified, res.Status)
 		})
-
-		require.NoError(t, err)
-		require.Equal(t, server.CrawlingTaskNotModified, res.Status)
 	})
 }

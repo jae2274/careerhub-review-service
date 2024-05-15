@@ -87,7 +87,9 @@ func TestReviewReaderGrpc(t *testing.T) {
 		require.NoError(t, err)
 		resultScore, ok := res.CompanyScores[companyName]
 		require.True(t, ok)
-		require.Equal(t, companyScore.AvgScore, resultScore)
+		require.Equal(t, companyScore.CompanyName, resultScore.CompanyName)
+		require.Equal(t, companyScore.AvgScore, resultScore.Score)
+		require.Equal(t, companyScore.ReviewCount, resultScore.ReviewCount)
 	})
 	t.Run("return companyScore by synonym name", func(t *testing.T) {
 		tinit.InitDB(t)
@@ -118,7 +120,9 @@ func TestReviewReaderGrpc(t *testing.T) {
 		require.NoError(t, err)
 		resultScore, ok := res.CompanyScores[synosymName]
 		require.True(t, ok)
-		require.Equal(t, companyScore.AvgScore, resultScore)
+		require.Equal(t, companyScore.CompanyName, resultScore.CompanyName)
+		require.Equal(t, companyScore.AvgScore, resultScore.Score)
+		require.Equal(t, companyScore.ReviewCount, resultScore.ReviewCount)
 	})
 
 	t.Run("return empty companyScore when updated status not_exist", func(t *testing.T) {
@@ -224,7 +228,9 @@ func TestReviewReaderGrpc(t *testing.T) {
 		for _, companyScore := range companyScores {
 			resultScore, ok := res.CompanyScores[companyScore.CompanyName]
 			require.True(t, ok)
-			require.Equal(t, companyScore.AvgScore, resultScore)
+			require.Equal(t, companyScore.CompanyName, resultScore.CompanyName)
+			require.Equal(t, companyScore.AvgScore, resultScore.Score)
+			require.Equal(t, companyScore.ReviewCount, resultScore.ReviewCount)
 		}
 	})
 
