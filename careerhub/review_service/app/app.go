@@ -47,7 +47,8 @@ func Run(ctx context.Context) {
 	db, err := mongocfg.NewDatabase(envVars.MongoUri, envVars.DbName, envVars.DBUser)
 	checkErr(ctx, err)
 
-	mongocfg.InitCollections(db, &company.Company{}, &review.Review{})
+	_, err = mongocfg.InitCollections(db, &company.Company{}, &review.Review{})
+	checkErr(ctx, err)
 	//TODO: implement collection struct
 	// err := mongocfg.InitCollections(db, &matchjob.MatchJob{}, &scrapjob.ScrapJob{})
 	// checkErr(ctx, err)
