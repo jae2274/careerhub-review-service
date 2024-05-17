@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/company"
+	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/review"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/mongocfg"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/vars"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/crawler"
@@ -45,6 +47,7 @@ func Run(ctx context.Context) {
 	db, err := mongocfg.NewDatabase(envVars.MongoUri, envVars.DbName, envVars.DBUser)
 	checkErr(ctx, err)
 
+	mongocfg.InitCollections(db, &company.Company{}, &review.Review{})
 	//TODO: implement collection struct
 	// err := mongocfg.InitCollections(db, &matchjob.MatchJob{}, &scrapjob.ScrapJob{})
 	// checkErr(ctx, err)
