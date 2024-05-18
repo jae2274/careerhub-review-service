@@ -15,6 +15,7 @@ import (
 )
 
 func TestReviewReaderGrpc(t *testing.T) {
+	tinit.InitDB(t)
 	cancelFunc := tinit.RunTestApp(t)
 	defer cancelFunc()
 
@@ -320,6 +321,28 @@ func TestReviewReaderGrpc(t *testing.T) {
 		res, err := restapiClient.GetCompanyReviews(ctx, &restapi_grpc.GetCompanyReviewsRequest{
 			Site:        "testSite",
 			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+		tutils.AssertEqualReviews(t, reviews, res.Reviews)
+	})
+
+	t.Run("return reviews by synonym company name", func(t *testing.T) {
+		tinit.InitDB(t)
+		ctx := context.Background()
+
+		reviews := []*crawler_grpc.Review{
+			tutils.NewCompanyReviewReq("", 45, true),
+		}
+		_, err := crawlerClient.SaveCompanyReviews(ctx, &crawler_grpc.SaveCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: "testCompany",
+			Reviews:     reviews,
+		})
+		require.NoError(t, err)
+
+		res, err := restapiClient.GetCompanyReviews(ctx, &restapi_grpc.GetCompanyReviewsRequest{
+			Site:        "testSite",
+			CompanyName: "testCompany(주식회사 테스트컴퍼니)",
 		})
 		require.NoError(t, err)
 		tutils.AssertEqualReviews(t, reviews, res.Reviews)

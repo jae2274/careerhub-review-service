@@ -59,7 +59,7 @@ func (s *ReviewReaderGrpcServer) GetCompanyReviews(ctx context.Context, in *rest
 		in.Limit = 100
 	}
 
-	reviews, err := s.reviewRepo.GetReviews(ctx, in.Site, in.CompanyName, in.Offset, in.Limit)
+	reviews, err := s.reviewRepo.GetReviews(ctx, in.Site, company.RefineNameForSearch(in.CompanyName), in.Offset, in.Limit)
 	if err != nil {
 		return nil, err
 	}
