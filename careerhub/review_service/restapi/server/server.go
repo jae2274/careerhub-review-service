@@ -40,9 +40,10 @@ func (s *ReviewReaderGrpcServer) GetCompanyScores(ctx context.Context, in *resta
 		for _, score := range c.ReviewSites {
 			if score.Site == in.Site {
 				companyScores[companyNamesMap[c.DefaultName]] = &restapi_grpc.CompanyScore{
-					CompanyName: c.DefaultName,
-					Score:       score.AvgScore,
-					ReviewCount: score.ReviewCount,
+					CompanyName:     c.DefaultName,
+					Score:           score.AvgScore,
+					ReviewCount:     score.ReviewCount,
+					IsCompleteCrawl: score.CrawlingStatus == company.Crawled,
 				}
 			}
 		}

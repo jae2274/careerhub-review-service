@@ -90,6 +90,41 @@ func TestReviewReaderGrpc(t *testing.T) {
 		require.Equal(t, companyScore.CompanyName, resultScore.CompanyName)
 		require.Equal(t, companyScore.AvgScore, resultScore.Score)
 		require.Equal(t, companyScore.ReviewCount, resultScore.ReviewCount)
+		require.Equal(t, false, resultScore.IsCompleteCrawl)
+	})
+
+	t.Run("return iscompletecrawl true when finish crawling task", func(t *testing.T) {
+		tinit.InitDB(t)
+
+		ctx := context.Background()
+
+		site := "testSite"
+		companyName := "testCompany"
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		companyScore := &crawler_grpc.SetReviewScoreRequest{
+			Site:        site,
+			CompanyName: companyName,
+			AvgScore:    45,
+		}
+		_, err = crawlerClient.SetReviewScore(ctx, companyScore)
+		require.NoError(t, err)
+		_, err = crawlerClient.FinishCrawlingTask(ctx, &crawler_grpc.FinishCrawlingTaskRequest{
+			Site:        site,
+			CompanyName: companyName,
+		})
+		require.NoError(t, err)
+
+		res, err := restapiClient.GetCompanyScores(ctx, &restapi_grpc.GetCompanyScoresRequest{
+			Site:         site,
+			CompanyNames: []string{companyName},
+		})
+
+		require.NoError(t, err)
+		require.Equal(t, true, res.CompanyScores[companyName].IsCompleteCrawl)
 	})
 	t.Run("return companyScore by synonym name", func(t *testing.T) {
 		tinit.InitDB(t)
@@ -123,6 +158,7 @@ func TestReviewReaderGrpc(t *testing.T) {
 		require.Equal(t, companyScore.CompanyName, resultScore.CompanyName)
 		require.Equal(t, companyScore.AvgScore, resultScore.Score)
 		require.Equal(t, companyScore.ReviewCount, resultScore.ReviewCount)
+		require.Equal(t, false, resultScore.IsCompleteCrawl)
 	})
 
 	t.Run("return empty companyScore when updated status not_exist", func(t *testing.T) {
@@ -231,6 +267,7 @@ func TestReviewReaderGrpc(t *testing.T) {
 			require.Equal(t, companyScore.CompanyName, resultScore.CompanyName)
 			require.Equal(t, companyScore.AvgScore, resultScore.Score)
 			require.Equal(t, companyScore.ReviewCount, resultScore.ReviewCount)
+			require.Equal(t, false, resultScore.IsCompleteCrawl)
 		}
 	})
 
