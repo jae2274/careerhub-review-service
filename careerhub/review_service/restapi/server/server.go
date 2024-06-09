@@ -22,11 +22,14 @@ func NewReviewReaderGrpcServer(companyRepo *repo.CompanyRepo, reviewRepo *repo.R
 }
 
 func (s *ReviewReaderGrpcServer) GetCompanyScores(ctx context.Context, in *restapi_grpc.GetCompanyScoresRequest) (*restapi_grpc.GetCompanyScoresResponse, error) {
-	companyNamesMap := make(map[string]string)
+	companyNamesMap := make(map[string][]string)
 	defaultCompanyNames := make([]string, 0, len(in.CompanyNames))
 	for _, companyName := range in.CompanyNames {
 		defaultName := company.RefineNameForSearch(companyName)
-		companyNamesMap[defaultName] = companyName
+		if _, ok := companyNamesMap[defaultName]; !ok {
+			companyNamesMap[defaultName] = make([]string, 0, 1)
+		}
+		companyNamesMap[defaultName] = append(companyNamesMap[defaultName], companyName)
 		defaultCompanyNames = append(defaultCompanyNames, defaultName)
 	}
 
@@ -39,11 +42,13 @@ func (s *ReviewReaderGrpcServer) GetCompanyScores(ctx context.Context, in *resta
 	for _, c := range companies {
 		for _, score := range c.ReviewSites {
 			if score.Site == in.Site {
-				companyScores[companyNamesMap[c.DefaultName]] = &restapi_grpc.CompanyScore{
-					CompanyName:     c.DefaultName,
-					Score:           score.AvgScore,
-					ReviewCount:     score.ReviewCount,
-					IsCompleteCrawl: score.CrawlingStatus == company.Crawled,
+				for _, companyName := range companyNamesMap[c.DefaultName] {
+					companyScores[companyName] = &restapi_grpc.CompanyScore{
+						CompanyName:     c.DefaultName,
+						Score:           score.AvgScore,
+						ReviewCount:     score.ReviewCount,
+						IsCompleteCrawl: score.CrawlingStatus == company.Crawled,
+					}
 				}
 			}
 		}

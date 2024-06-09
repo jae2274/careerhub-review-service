@@ -272,6 +272,41 @@ func TestReviewReaderGrpc(t *testing.T) {
 		}
 	})
 
+	t.Run("return same companyScores from synonym names", func(t *testing.T) {
+		ctx := context.Background()
+		site := "testSite"
+
+		companyScore := &crawler_grpc.SetReviewScoreRequest{
+			Site:        site,
+			CompanyName: "testCompany",
+			AvgScore:    45,
+		}
+
+		_, err := providerClient.AddCrawlingTask(ctx, &provider_grpc.AddCrawlingTaskRequest{
+			CompanyName: companyScore.CompanyName,
+		})
+		require.NoError(t, err)
+
+		_, err = crawlerClient.SetReviewScore(ctx, companyScore)
+		require.NoError(t, err)
+
+		res, err := restapiClient.GetCompanyScores(ctx, &restapi_grpc.GetCompanyScoresRequest{
+			Site:         site,
+			CompanyNames: []string{"testCompany", "testCompany(주식회사 테스트컴퍼니)"},
+		})
+
+		require.NoError(t, err)
+		require.Len(t, res.CompanyScores, 2)
+
+		for resCompanyName, resCompanyScore := range res.CompanyScores {
+			require.Contains(t, []string{"testCompany", "testCompany(주식회사 테스트컴퍼니)"}, resCompanyName)
+			require.Equal(t, companyScore.CompanyName, resCompanyScore.CompanyName)
+			require.Equal(t, companyScore.AvgScore, resCompanyScore.Score)
+			require.Equal(t, companyScore.ReviewCount, resCompanyScore.ReviewCount)
+			require.Equal(t, false, resCompanyScore.IsCompleteCrawl)
+		}
+	})
+
 	t.Run("return empty reviews when nothing saved", func(t *testing.T) {
 		tinit.InitDB(t)
 		ctx := context.Background()
