@@ -7,12 +7,16 @@ import (
 )
 
 func RefineNameForSearch(input string) string {
-	index := strings.Index(input, "(")
-	if index == -1 {
+	fitstBracket := strings.Index(input, "(")
+	if fitstBracket == -1 {
+		return input
+	}
+	secondBracket := strings.Index(input, ")")
+	if secondBracket == -1 {
 		return input
 	}
 
-	return strings.TrimSpace(input[:index])
+	return strings.TrimSpace(input[:fitstBracket]) + strings.TrimSpace(input[secondBracket+1:])
 }
 
 func FilterNotIncludeSite(site string) bson.M {
