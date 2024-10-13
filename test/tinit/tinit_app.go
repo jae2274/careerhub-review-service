@@ -13,6 +13,7 @@ import (
 )
 
 func RunTestApp(t *testing.T) context.CancelFunc {
+	InitDB(t)
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	go app.Run(ctx)
 

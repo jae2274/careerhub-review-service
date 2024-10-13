@@ -6,6 +6,7 @@ import (
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/common/domain/company"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/provider_grpc"
 	"github.com/jae2274/careerhub-review-service/careerhub/review_service/provider/repo"
+	"github.com/jae2274/goutils/terr"
 )
 
 type CrawlingTaskGrpcServer struct {
@@ -26,6 +27,10 @@ const (
 )
 
 func (p *CrawlingTaskGrpcServer) AddCrawlingTask(ctx context.Context, in *provider_grpc.AddCrawlingTaskRequest) (*provider_grpc.AddCrawlingTaskResponse, error) {
+	if in.CompanyName == "" {
+		return nil, terr.New("CompanyName is empty")
+	}
+
 	refinedName := company.RefineNameForSearch(in.CompanyName)
 	_, isExisted, err := p.companyRepo.FindCompany(ctx, refinedName, in.CompanyName)
 	if err != nil {
